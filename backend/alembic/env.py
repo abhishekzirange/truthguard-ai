@@ -19,12 +19,20 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # Configure sqlalchemy.url dynamically from config option, environment variable, or settings
-_resolved_url = config.get_main_option("sqlalchemy.url") or os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+_raw_url = config.get_main_option("sqlalchemy.url")
+if not _raw_url or _raw_url.startswith("driver://"):
+    _resolved_url = os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+else:
+    _resolved_url = _raw_url
 config.set_main_option("sqlalchemy.url", _resolved_url)
 
 
 def run_migrations_offline() -> None:
-    url = config.get_main_option("sqlalchemy.url") or os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+    _raw_url = config.get_main_option("sqlalchemy.url")
+    if not _raw_url or _raw_url.startswith("driver://"):
+        url = os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+    else:
+        url = _raw_url
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -38,7 +46,11 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     configuration = config.get_section(config.config_ini_section, {})
-    url = config.get_main_option("sqlalchemy.url") or os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+    _raw_url = config.get_main_option("sqlalchemy.url")
+    if not _raw_url or _raw_url.startswith("driver://"):
+        url = os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+    else:
+        url = _raw_url
     configuration["sqlalchemy.url"] = url
     connectable = engine_from_config(
         configuration,

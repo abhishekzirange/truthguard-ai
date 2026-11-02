@@ -73,6 +73,11 @@ class VerificationService:
             freshness_accumulator = []
             quality_accumulator = []
 
+            tavily_live_success_count = 0
+            tavily_errors = []
+            bifrost_live_success_count = 0
+            bifrost_errors = []
+
             for claim_data in extracted_claims_data:
                 claim_id = str(uuid.uuid4())
                 
@@ -85,6 +90,11 @@ class VerificationService:
                     search_depth=request.verification_depth,
                     max_results=4
                 )
+                if search_res.get("live_success"):
+                    tavily_live_success_count += 1
+                elif search_res.get("error"):
+                    tavily_errors.append(search_res["error"])
+
                 raw_results = search_res.get("results", [])
 
                 # Create Evidence DB models & normalize
@@ -94,11 +104,12 @@ class VerificationService:
                     source_type, rel_score = ReliabilityEngine.evaluate_source(r.get("url", ""), r.get("title", ""))
                     ev_id = str(uuid.uuid4())
                     
-                    # Parse published date if present
+                    # Parse published date if present without fabrication
                     pub_dt = None
                     if r.get("published_at"):
                         try:
-                            pub_dt = datetime.fromisoformat(r["published_at"].replace("Z", "+00:00"))
+                            clean_pub = str(r["published_at"]).replace("Z", "+00:00")
+                            pub_dt = datetime.fromisoformat(clean_pub)
                         except Exception:
                             pub_dt = None
 
@@ -134,6 +145,21 @@ class VerificationService:
                     evidence_list=evidence_dict_list,
                     freshness_policy=request.freshness_policy
                 )
+
+                assessment_prov = assessment_result.get("provenance", "OFFLINE_LOCAL")
+                if assessment_prov == "LIVE_BIFROST":
+                    bifrost_live_success_count += 1
+
+                # Accurate Provenance determination
+                is_search_live = search_res.get("live_success", False)
+                if is_search_live and assessment_prov == "LIVE_BIFROST":
+                    claim_provenance = "LIVE_TAVILY_BIFROST"
+                elif is_search_live and assessment_prov != "LIVE_BIFROST":
+                    claim_provenance = "OFFLINE_DETERMINISTIC" if assessment_prov == "OFFLINE_DETERMINISTIC" else "PARTIAL_TAVILY_ONLY"
+                elif not is_search_live and assessment_prov == "LIVE_BIFROST":
+                    claim_provenance = "PARTIAL_BIFROST_ONLY"
+                else:
+                    claim_provenance = assessment_prov if assessment_prov in ["OFFLINE_DETERMINISTIC", "OFFLINE_HEURISTIC_ANALYSIS"] else "OFFLINE_LOCAL"
 
                 verdict = assessment_result.get("verdict", "UNVERIFIED")
                 if verdict == "CURRENT":
@@ -178,7 +204,7 @@ class VerificationService:
                     id=str(uuid.uuid4()),
                     claim_id=claim_id,
                     verdict=verdict,
-                    provenance=assessment_result.get("provenance", "OFFLINE_DETERMINISTIC"),
+                    provenance=claim_provenance,
                     freshness_score=assessment_result.get("freshness_score"),
                     evidence_quality_score=assessment_result.get("evidence_quality_score"),
                     reasoning=assessment_result.get("reasoning", ""),
@@ -191,18 +217,37 @@ class VerificationService:
                 self.db.add(assessment_model)
 
             # Record model usage honestly (0 tokens when running offline fallback)
-            is_live = bool(self.bifrost_adapter.api_key)
+            is_live_run = (bifrost_live_success_count > 0)
             usage = ModelUsage(
                 id=str(uuid.uuid4()),
                 run_id=run.id,
-                model=self.bifrost_adapter.model if is_live else "local-deterministic-engine",
-                provider="bifrost" if is_live else "offline_local",
-                input_tokens=150 * len(extracted_claims_data) if is_live else 0,
-                output_tokens=80 * len(extracted_claims_data) if is_live else 0,
-                estimated_cost=0.0002 * len(extracted_claims_data) if is_live else 0.0,
+                model=self.bifrost_adapter.model if is_live_run else "local-deterministic-engine",
+                provider="bifrost" if is_live_run else "offline_local",
+                input_tokens=150 * len(extracted_claims_data) if is_live_run else 0,
+                output_tokens=80 * len(extracted_claims_data) if is_live_run else 0,
+                estimated_cost=0.0002 * len(extracted_claims_data) if is_live_run else 0.0,
                 latency_ms=int((time.time() - start_time) * 1000)
             )
             self.db.add(usage)
+
+            # Determine overall execution mode
+            if tavily_live_success_count > 0 and bifrost_live_success_count > 0:
+                run.execution_mode = "LIVE"
+            elif tavily_live_success_count > 0 or bifrost_live_success_count > 0:
+                run.execution_mode = "PARTIAL"
+            else:
+                run.execution_mode = "OFFLINE"
+
+            run.integration_status = {
+                "tavily": {
+                    "status": "HEALTHY" if tavily_live_success_count > 0 else ("FAILED" if self.tavily_adapter.api_key else "UNCONFIGURED"),
+                    "error": tavily_errors[0] if tavily_errors else None
+                },
+                "bifrost": {
+                    "status": "HEALTHY" if bifrost_live_success_count > 0 else ("FAILED" if self.bifrost_adapter.api_key else "UNCONFIGURED"),
+                    "error": bifrost_errors[0] if bifrost_errors else None
+                }
+            }
 
             # Finalize Run
             total_claims = len(extracted_claims_data)
@@ -222,7 +267,7 @@ class VerificationService:
                 "overall_freshness_score": avg_freshness,
                 "overall_evidence_quality_score": avg_quality,
             }
-            self._record_event(run.id, "FINISHED", f"Verification successfully completed in {run.execution_time_ms}ms")
+            self._record_event(run.id, "FINISHED", f"Verification ({run.execution_mode}) completed in {run.execution_time_ms}ms")
             self.db.commit()
             self.db.refresh(run)
             return run

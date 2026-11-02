@@ -13,7 +13,12 @@ import {
   Layers,
   ArrowRight,
   TrendingUp,
-  FileText
+  FileText,
+  Radio,
+  Wifi,
+  WifiOff,
+  Database,
+  Cpu
 } from 'lucide-react';
 import { getVerificationRun } from '../services/api';
 import { VerificationRun, Claim, ClaimStatus } from '../types';
@@ -85,6 +90,8 @@ export const ResultsPage: React.FC = () => {
     return claim.status === statusFilter;
   });
 
+  const execMode = run.execution_mode || 'OFFLINE';
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Top Bar Navigation */}
@@ -107,6 +114,53 @@ export const ResultsPage: React.FC = () => {
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
+      </div>
+
+      {/* Execution Mode Banner */}
+      <div className={`mb-6 rounded-2xl border p-4.5 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+        execMode === 'LIVE'
+          ? 'border-emerald-500/30 bg-emerald-950/20 text-emerald-300'
+          : execMode === 'PARTIAL'
+          ? 'border-amber-500/30 bg-amber-950/20 text-amber-300'
+          : 'border-slate-800 bg-slate-900/60 text-slate-300'
+      }`}>
+        <div className="flex items-center gap-3">
+          <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${
+            execMode === 'LIVE' ? 'bg-emerald-500/20 text-emerald-400' : execMode === 'PARTIAL' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-400'
+          }`}>
+            {execMode === 'LIVE' ? <Wifi className="h-5 w-5" /> : execMode === 'PARTIAL' ? <Radio className="h-5 w-5" /> : <Database className="h-5 w-5" />}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider">
+                Execution Mode: {execMode} VERIFICATION
+              </span>
+              <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                execMode === 'LIVE'
+                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                  : execMode === 'PARTIAL'
+                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+                  : 'border-slate-700 bg-slate-800 text-slate-400'
+              }`}>
+                {execMode === 'LIVE' ? 'LIVE_TAVILY_BIFROST' : execMode === 'PARTIAL' ? 'PARTIAL_EXTERNAL' : 'OFFLINE_DETERMINISTIC'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {execMode === 'LIVE'
+                ? 'Ground-truth verified via real-time Tavily search retrieval and Bifrost AI Gateway consensus.'
+                : execMode === 'PARTIAL'
+                ? 'Executed with partial external API connectivity. Missing components fell back safely to deterministic rules.'
+                : 'Executed in offline deterministic mode with PEP 440 SemVer parsing, pattern consensus, and verified corpus.'}
+            </p>
+          </div>
+        </div>
+
+        {run.integration_status && (
+          <div className="text-right text-[11px] font-mono text-slate-400 shrink-0 border-t sm:border-t-0 sm:border-l border-slate-800 pt-2 sm:pt-0 sm:pl-4">
+            <div>Tavily: <span className={run.integration_status?.tavily?.status === 'HEALTHY' ? 'text-emerald-400' : 'text-slate-500'}>{run.integration_status?.tavily?.status || 'N/A'}</span></div>
+            <div>Bifrost: <span className={run.integration_status?.bifrost?.status === 'HEALTHY' ? 'text-emerald-400' : 'text-slate-500'}>{run.integration_status?.bifrost?.status || 'N/A'}</span></div>
+          </div>
+        )}
       </div>
 
       {/* Verification Executive Summary Card */}
@@ -198,6 +252,7 @@ export const ResultsPage: React.FC = () => {
       <div className="space-y-4">
         {filteredClaims.map((claim: Claim, idx: number) => {
           const assessment = claim.assessment;
+          const provenance = assessment?.provenance || 'OFFLINE_DETERMINISTIC';
           return (
             <div
               key={claim.id}
@@ -213,7 +268,7 @@ export const ResultsPage: React.FC = () => {
             >
               {/* Claim Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/60 pb-3 mb-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center flex-wrap gap-2">
                   <span className="font-mono text-xs text-slate-500 font-bold">#{idx + 1}</span>
                   <StatusBadge status={claim.status} size="sm" />
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
@@ -224,12 +279,26 @@ export const ResultsPage: React.FC = () => {
                   }`}>
                     {claim.temporal_sensitivity} SENSITIVITY
                   </span>
+                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                    provenance.startsWith('LIVE')
+                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                      : provenance.startsWith('PARTIAL')
+                      ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+                      : 'border-slate-800 bg-slate-950 text-slate-400'
+                  }`}>
+                    {provenance}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs">
+                  {assessment?.freshness_score !== undefined && assessment?.freshness_score !== null && (
+                    <span className="text-slate-400">
+                      Freshness: <strong className="text-slate-200 font-mono">{assessment.freshness_score}%</strong>
+                    </span>
+                  )}
                   {assessment?.evidence_quality_score !== undefined && assessment?.evidence_quality_score !== null && (
                     <span className="text-slate-400">
-                      Quality: <strong className="text-slate-200 font-mono">{assessment.evidence_quality_score}%</strong>
+                      Evidence Quality: <strong className="text-slate-200 font-mono">{assessment.evidence_quality_score}%</strong>
                     </span>
                   )}
                   <Link
@@ -276,4 +345,3 @@ export const ResultsPage: React.FC = () => {
     </div>
   );
 };
-

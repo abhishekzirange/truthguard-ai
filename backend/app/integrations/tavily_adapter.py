@@ -1,5 +1,6 @@
 import re
 import time
+import asyncio
 import logging
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
@@ -536,17 +537,20 @@ class TavilyAdapter:
 
         start_time = time.time()
 
-        # If API key is not configured, check for known domain/demo terms
+        # If API key is not configured, record explicit offline status
         if not self.api_key or self.api_key.strip() == "":
             fallback_results = self._get_demo_fallback(query)
             latency_ms = int((time.time() - start_time) * 1000)
             return {
                 "results": fallback_results,
                 "cached": False,
+                "is_live": False,
+                "live_success": False,
                 "is_fallback": True,
                 "query": query,
                 "latency_ms": latency_ms,
-                "error": None if fallback_results else "TAVILY_API_KEY_NOT_CONFIGURED"
+                "error": "TAVILY_KEY_NOT_CONFIGURED: Live search key is unconfigured",
+                "error_type": "TAVILY_KEY_NOT_CONFIGURED"
             }
 
         tavily_depth = "advanced" if search_depth == "deep" else "basic"
@@ -564,39 +568,73 @@ class TavilyAdapter:
         if exclude_domains:
             payload["exclude_domains"] = exclude_domains
 
-        try:
-            async with httpx.AsyncClient(timeout=12.0) as client:
-                response = await client.post(f"{self.base_url}/search", json=payload)
-                latency_ms = int((time.time() - start_time) * 1000)
+        max_retries = 2
+        last_error = None
+        last_error_type = None
 
-                if response.status_code == 200:
-                    data = response.json()
-                    raw_results = data.get("results", [])
-                    normalized = self._normalize_results(raw_results)
-                    _SEARCH_CACHE[cache_key] = (now, normalized)
-                    return {
-                        "results": normalized,
-                        "cached": False,
-                        "query": query,
-                        "latency_ms": latency_ms,
-                        "error": None
-                    }
-                else:
-                    return {
-                        "results": self._get_demo_fallback(query),
-                        "cached": False,
-                        "latency_ms": latency_ms,
-                        "error": f"HTTP_{response.status_code}"
-                    }
+        for attempt in range(max_retries + 1):
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    response = await client.post(f"{self.base_url}/search", json=payload)
+                    latency_ms = int((time.time() - start_time) * 1000)
 
-        except Exception as e:
-            latency_ms = int((time.time() - start_time) * 1000)
-            return {
-                "results": self._get_demo_fallback(query),
-                "cached": False,
-                "latency_ms": latency_ms,
-                "error": str(e)
-            }
+                    if response.status_code == 200:
+                        data = response.json()
+                        raw_results = data.get("results", [])
+                        normalized = self._normalize_results(raw_results)
+                        _SEARCH_CACHE[cache_key] = (now, normalized)
+                        return {
+                            "results": normalized,
+                            "cached": False,
+                            "is_live": True,
+                            "live_success": True,
+                            "query": query,
+                            "latency_ms": latency_ms,
+                            "error": None,
+                            "error_type": None
+                        }
+                    elif response.status_code in (401, 403):
+                        last_error = f"TAVILY_AUTH_ERROR: Authentication failed with HTTP {response.status_code}"
+                        last_error_type = "TAVILY_AUTH_ERROR"
+                        break  # Do not retry auth failures
+                    elif response.status_code == 429:
+                        last_error = "TAVILY_RATE_LIMIT: Rate limit exceeded (HTTP 429)"
+                        last_error_type = "TAVILY_RATE_LIMIT"
+                        if attempt < max_retries:
+                            await asyncio.sleep(0.5 * (2 ** attempt))
+                            continue
+                    else:
+                        last_error = f"TAVILY_HTTP_ERROR: Tavily returned HTTP {response.status_code}"
+                        last_error_type = "TAVILY_HTTP_ERROR"
+                        if response.status_code >= 500 and attempt < max_retries:
+                            await asyncio.sleep(0.5 * (2 ** attempt))
+                            continue
+                        break
+
+            except httpx.TimeoutException:
+                last_error = "TAVILY_TIMEOUT: Tavily search timed out"
+                last_error_type = "TAVILY_TIMEOUT"
+                if attempt < max_retries:
+                    await asyncio.sleep(0.5 * (2 ** attempt))
+                    continue
+            except Exception as e:
+                last_error = f"TAVILY_NETWORK_ERROR: {str(e)}"
+                last_error_type = "TAVILY_NETWORK_ERROR"
+                break
+
+        latency_ms = int((time.time() - start_time) * 1000)
+        fallback_results = self._get_demo_fallback(query)
+        return {
+            "results": fallback_results,
+            "cached": False,
+            "is_live": False,
+            "live_success": False,
+            "is_fallback": True,
+            "query": query,
+            "latency_ms": latency_ms,
+            "error": last_error,
+            "error_type": last_error_type
+        }
 
     async def check_health(self) -> Dict[str, Any]:
         if not self.api_key:
@@ -694,12 +732,22 @@ class TavilyAdapter:
                 continue
             seen_urls.add(clean_url)
 
+            # Parse publication date if present without fabrication
+            pub_raw = item.get("published_date") or item.get("published_at")
+            pub_str = None
+            if pub_raw and isinstance(pub_raw, str):
+                try:
+                    clean_pub = pub_raw.replace("Z", "+00:00")
+                    pub_str = datetime.fromisoformat(clean_pub).isoformat()
+                except Exception:
+                    pub_str = None
+
             normalized.append({
                 "title": item.get("title", "Web Source").strip(),
                 "url": clean_url,
                 "domain": domain,
                 "snippet": item.get("content", "").strip(),
-                "published_at": item.get("published_date"),
+                "published_at": pub_str,
                 "relevance_score": float(item.get("score", 0.75)),
             })
 

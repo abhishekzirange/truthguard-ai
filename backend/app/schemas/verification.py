@@ -33,6 +33,8 @@ class VerificationRunResponse(BaseModel):
     freshness_policy: str
     verification_depth: str
     verification_status: Literal["PENDING", "PROCESSING", "COMPLETED", "FAILED"]
+    execution_mode: str = "OFFLINE"
+    integration_status: Optional[Dict[str, Any]] = None
     execution_time_ms: Optional[int] = None
     summary: Optional[VerificationSummary] = None
     error_message: Optional[str] = None
@@ -49,6 +51,7 @@ class VerificationRunListItem(BaseModel):
     domain: str
     freshness_policy: str
     verification_status: str
+    execution_mode: str = "OFFLINE"
     execution_time_ms: Optional[int] = None
     total_claims: int = 0
     outdated_count: int = 0

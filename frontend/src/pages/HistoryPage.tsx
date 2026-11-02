@@ -88,6 +88,7 @@ export const HistoryPage: React.FC = () => {
                   <th className="py-3 px-3">Date</th>
                   <th className="py-3 px-3">Answer Preview</th>
                   <th className="py-3 px-3">Domain</th>
+                  <th className="py-3 px-3">Mode</th>
                   <th className="py-3 px-3">Claims</th>
                   <th className="py-3 px-3">Outdated</th>
                   <th className="py-3 px-3">Latency</th>
@@ -103,6 +104,17 @@ export const HistoryPage: React.FC = () => {
                     </td>
                     <td className="py-3 px-3 max-w-sm truncate text-slate-200">{r.original_answer}</td>
                     <td className="py-3 px-3 capitalize text-slate-400">{r.domain}</td>
+                    <td className="py-3 px-3">
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                        r.execution_mode === 'LIVE'
+                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+                          : r.execution_mode === 'PARTIAL'
+                          ? 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+                          : 'border-slate-800 bg-slate-950 text-slate-400'
+                      }`}>
+                        {r.execution_mode || 'OFFLINE'}
+                      </span>
+                    </td>
                     <td className="py-3 px-3 font-mono">{r.total_claims}</td>
                     <td className="py-3 px-3 font-mono font-bold text-rose-400">{r.outdated_count}</td>
                     <td className="py-3 px-3 font-mono text-slate-400">{r.execution_time_ms || 0} ms</td>

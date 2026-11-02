@@ -15,6 +15,8 @@ class VerificationRun(Base):
     freshness_policy = Column(String(50), default="standard", nullable=False)
     verification_depth = Column(String(50), default="standard", nullable=False)
     verification_status = Column(String(50), default="PENDING", index=True, nullable=False)  # PENDING, PROCESSING, COMPLETED, FAILED
+    execution_mode = Column(String(50), default="OFFLINE", nullable=False)  # LIVE, PARTIAL, OFFLINE
+    integration_status = Column(JSON, nullable=True)  # Health & failure status for Tavily & Bifrost
     
     execution_time_ms = Column(Integer, nullable=True)
     summary = Column(JSON, nullable=True)  # Store summary metrics {total, outdated, current, etc.}

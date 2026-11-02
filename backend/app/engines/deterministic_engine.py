@@ -11,7 +11,7 @@ _PRICE_EXTRACTION_REGEX = re.compile(r"\$(\d+(\.\d+)?)|(\d+(\.\d+)?)\s*(USD|doll
 
 # Intent classification regexes
 _LATEST_INTENT_REGEX = re.compile(
-    r"\b(latest|newest|current|currently|most\s+recent|active\s+(lts\s+)?(release|version)?|active\s+lts|lts\s+release|modern\s+version|primary\s+release|up\s+to\s+date|latest\s+stable)\b",
+    r"\b(latest|newest|current|currently|most\s+recent|active\s+(lts\s+)?(release|version)?|active\s+lts|lts\s+release|modern\s+version|primary\s+(recommended\s+)?(release|version)?|recommended\s+(release|version)?|standard\s+public\s+support|actively\s+supported|up\s+to\s+date|latest\s+stable)\b",
     re.IGNORECASE
 )
 

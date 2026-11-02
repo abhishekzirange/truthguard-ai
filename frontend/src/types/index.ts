@@ -1,5 +1,6 @@
 export type ClaimStatus = 'CURRENT' | 'OUTDATED' | 'CONTRADICTED' | 'UNVERIFIED' | 'TIME_SENSITIVE';
 export type TemporalSensitivity = 'HIGH' | 'MEDIUM' | 'LOW';
+export type ExecutionMode = 'LIVE' | 'PARTIAL' | 'OFFLINE';
 
 export interface EvidenceItem {
   id: string;
@@ -26,6 +27,7 @@ export interface ClaimAssessment {
   supporting_evidence_ids: string[];
   contradicting_evidence_ids: string[];
   missing_information: string[];
+  provenance?: string | null;
   assessed_at?: string;
 }
 
@@ -67,6 +69,8 @@ export interface VerificationRun {
   freshness_policy: string;
   verification_depth: string;
   verification_status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  execution_mode?: 'LIVE' | 'PARTIAL' | 'OFFLINE';
+  integration_status?: Record<string, any> | null;
   execution_time_ms?: number | null;
   summary?: VerificationSummary | null;
   error_message?: string | null;
@@ -81,6 +85,7 @@ export interface VerificationRunListItem {
   domain: string;
   freshness_policy: string;
   verification_status: string;
+  execution_mode?: 'LIVE' | 'PARTIAL' | 'OFFLINE';
   execution_time_ms?: number | null;
   total_claims: number;
   outdated_count: number;

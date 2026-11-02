@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles,
@@ -13,9 +13,14 @@ import {
   Code2,
   DollarSign,
   FileText,
-  Server
+  Server,
+  Radio,
+  Wifi,
+  WifiOff,
+  Info
 } from 'lucide-react';
-import { submitVerification } from '../services/api';
+import { submitVerification, getIntegrationsStatus } from '../services/api';
+import { IntegrationsReport } from '../types';
 
 const PRESETS = [
   {
@@ -72,6 +77,13 @@ export const WorkspacePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [integrations, setIntegrations] = useState<IntegrationsReport | null>(null);
+
+  useEffect(() => {
+    getIntegrationsStatus()
+      .then(setIntegrations)
+      .catch((err) => console.warn('Could not fetch integrations status', err));
+  }, []);
 
   const handleVerify = async () => {
     if (!answerText.trim() || answerText.length < 5) {
@@ -112,20 +124,84 @@ export const WorkspacePage: React.FC = () => {
     setError(null);
   };
 
+  const isTavilyLive = Boolean(integrations?.tavily?.configured && integrations?.tavily?.reachable);
+  const isBifrostLive = Boolean(integrations?.bifrost?.configured && integrations?.bifrost?.reachable);
+
+  const activeMode = (isTavilyLive && isBifrostLive)
+    ? 'LIVE'
+    : (isTavilyLive || isBifrostLive)
+    ? 'PARTIAL'
+    : 'OFFLINE';
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-400 mb-2">
-          <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
-          <span>Verification Workspace</span>
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-400 mb-2">
+            <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
+            <span>Verification Workspace</span>
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Audit an AI-Generated Answer
+          </h1>
+          <p className="mt-2 text-sm text-slate-400 max-w-2xl">
+            Deconstruct AI text outputs into verifiable claims, cross-check against authoritative evidence, and detect outdated facts before hallucinations reach production.
+          </p>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-          Audit an AI-Generated Answer
-        </h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Paste any text output from ChatGPT, Claude, or Gemini to extract claims, detect outdated facts, and review live evidence.
-        </p>
+
+        {/* Integration Readiness Badges */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 self-start md:self-auto min-w-[260px]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">System Pipeline Mode</span>
+            <span
+              className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                activeMode === 'LIVE'
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  : activeMode === 'PARTIAL'
+                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                  : 'bg-slate-800 text-slate-300 border border-slate-700'
+              }`}
+            >
+              {activeMode} MODE
+            </span>
+          </div>
+
+          <div className="space-y-1.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center gap-1.5">
+                {isTavilyLive ? <Wifi className="h-3 w-3 text-emerald-400" /> : <WifiOff className="h-3 w-3 text-slate-500" />}
+                Tavily Live Search:
+              </span>
+              <span className={isTavilyLive ? 'text-emerald-400 font-mono text-[11px]' : 'text-slate-500 font-mono text-[11px]'}>
+                {isTavilyLive ? 'ONLINE' : 'OFFLINE'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center gap-1.5">
+                {isBifrostLive ? <Wifi className="h-3 w-3 text-emerald-400" /> : <WifiOff className="h-3 w-3 text-slate-500" />}
+                Bifrost AI Gateway:
+              </span>
+              <span className={isBifrostLive ? 'text-emerald-400 font-mono text-[11px]' : 'text-slate-500 font-mono text-[11px]'}>
+                {isBifrostLive ? 'ONLINE' : 'OFFLINE'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Metric Distinction Hint */}
+      <div className="mb-6 rounded-xl border border-indigo-500/20 bg-indigo-950/20 p-3.5 flex items-start gap-3">
+        <Info className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+        <div className="text-xs text-slate-300 space-y-1">
+          <p>
+            <strong className="text-indigo-300">TruthGuard Tri-Metric Architecture:</strong>{' '}
+            <strong className="text-white">Freshness Score</strong> measures temporal age decay via domain half-lives;{' '}
+            <strong className="text-white">Evidence Quality</strong> measures corroboration, relevance, and source domain reputation;{' '}
+            <strong className="text-white">Verdict</strong> is the factual determination (Current, Outdated, Contradicted, or Unverified).
+          </p>
+        </div>
       </div>
 
       {/* Preset Pills */}
@@ -286,4 +362,3 @@ export const WorkspacePage: React.FC = () => {
     </div>
   );
 };
-

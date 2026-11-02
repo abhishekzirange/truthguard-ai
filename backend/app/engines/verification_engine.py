@@ -68,12 +68,12 @@ class ClaimVerificationEngine:
 
         # Step 3: Run Deterministic Engines
         # Check software versions with linguistic intent detection (Fix 1)
-        if category in ["software_version", "api_version"] and version_mentioned:
+        if version_mentioned:
             texts = [ev.get("snippet", "") + " " + ev.get("title", "") for ev in evidence_list]
             ver_result = DeterministicEngine.compare_software_versions(
                 version_mentioned, texts, claim_text=claim_text
             )
-            if ver_result:
+            if ver_result and ver_result["verdict"] != "UNVERIFIED":
                 latest_ver = ver_result.get("latest_version")
                 correction = None
                 if ver_result.get("is_outdated") and latest_ver:
@@ -281,7 +281,7 @@ class ClaimVerificationEngine:
         # C. Direct Negative Fact / Opposition Cues
         opposition_cues = [
             (r"\b(repealed|abolished|invalidated)\b", r"\b(remains active law|still in effect|actively enforced|valid law)\b"),
-            (r"\b(zero dollars|free of charge|zero cost|no fee)\b", r"\b(not zero|positive cost|fee required|charges apply|subscription required)\b"),
+            (r"\b(zero dollars|free of charge|zero cost|no fee|always free)\b", r"\b(not zero|positive cost|fee required|charges apply|subscription required|paid via|are paid)\b"),
             (r"\b(daemon|background process)\b", r"\b(serverless|ephemeral|stateless)\b"),
             (r"\b(written in php)\b", r"\b(written in python|written in rust|written in go)\b"),
             (r"\b(created by openai)\b", r"\b(created by guido van rossum|created by canonical|created by google)\b"),
@@ -307,8 +307,8 @@ class ClaimVerificationEngine:
 
         # 3. General Outdated / Supersession Patterns -> OUTDATED
         # A. Leadership succession / departure
-        if re.search(r"\b(is (the )?(current )?(ceo|president|leader|director|executive)|leads|heads)\b", claim_lower):
-            if re.search(r"\b(stepped down|resigned|succeeded by|former (ceo|president)|passed away in|replaced by|left the role)\b", combined_evidence):
+        if re.search(r"\b((is |are )?(currently )?(run by|led by|headed by)|is (the )?(current )?(\w+ )?(ceo|president|leader|director|executive|chairman)|leads|heads)\b", claim_lower):
+            if re.search(r"\b(stepped down|resigned|succeeded by|former (ceo|president)|passed away|replaced by|left the role|was terminated|ousted|departed)\b", combined_evidence):
                 return {
                     "verdict": "OUTDATED",
                     "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
@@ -322,8 +322,8 @@ class ClaimVerificationEngine:
                 }
 
         # B. Geopolitical / Treaty status change
-        if re.search(r"\b(is a member state|part of the european union|valid framework)\b", claim_lower):
-            if re.search(r"\b(officially left|withdrew from|invalidated by the european court|no longer in force)\b", combined_evidence):
+        if re.search(r"\b(member state of (the )?european union|formal member state|current (active )?(legal )?framework|active agreement|valid framework)\b", claim_lower):
+            if re.search(r"\b(officially left|withdrew from|invalidated|struck down|no longer in force|obsolete|superseded)\b", combined_evidence):
                 return {
                     "verdict": "OUTDATED",
                     "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
@@ -339,7 +339,7 @@ class ClaimVerificationEngine:
         # C. Software / Standard End-of-Life (EOL) or Supersession
         if category in ["software_version", "api_version"] or re.search(r"\b(version|release|v\d+|\d+\.\d+)\b", claim_lower):
             eol_markers = re.search(
-                r"\b(end[- ]of[- ]life|reached end of life|end of standard support|eol|superseded by|retired in \d{4}|no longer maintained|no longer receiving security updates|legacy standard|obsolete release)\b",
+                r"\b(end[- ]of[- ]life|reached end of life|end of (standard )?(\w+ )?support|eol|superseded|retired in \d{4}|no longer maintained|no longer receiving security updates|legacy standard|obsolete release)\b",
                 combined_evidence
             )
             if eol_markers and not re.search(r"\b(deprecated dockershim|historical|was released)\b", claim_lower):

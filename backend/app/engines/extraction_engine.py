@@ -99,9 +99,15 @@ class ClaimExtractionEngine:
             # Classify
             classification = ClassificationEngine.classify_claim(sentence, domain)
             
-            # Detect version mentions
-            version_match = _VERSION_MENTION_REGEX.search(sentence)
-            version_val = version_match.group(1) if version_match else None
+            # Detect version mentions (support semantic versions, CalVer, and major versions like Node.js 12, React 16)
+            version_val = None
+            for m in re.finditer(r"\b(?:v|version\s*)?(\d+(?:\.\d+)*([a-zA-Z0-9_\-\.]+)?)\b", sentence, re.IGNORECASE):
+                cand = m.group(1).lstrip("v").strip()
+                # Exclude calendar years (1900-2099) when no minor version exists
+                if cand.isdigit() and len(cand) == 4 and (cand.startswith("19") or cand.startswith("20")):
+                    continue
+                version_val = cand
+                break
 
             # Detect date mentions
             date_match = _DATE_MENTION_REGEX.search(sentence)

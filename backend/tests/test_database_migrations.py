@@ -43,9 +43,13 @@ class TestDatabaseMigrations:
         assert "source_domains" in tables_after_upgrade
         assert "alembic_version" in tables_after_upgrade
 
-        # Verify provenance column exists in claim_assessments
+        # Verify provenance column exists in claim_assessments and execution_mode in verification_runs
         cols = [c["name"] for c in inspector.get_columns("claim_assessments")]
         assert "provenance" in cols
+
+        run_cols = [c["name"] for c in inspector.get_columns("verification_runs")]
+        assert "execution_mode" in run_cols
+        assert "integration_status" in run_cols
 
         # 2. Downgrade to base
         command.downgrade(cfg, "base")
