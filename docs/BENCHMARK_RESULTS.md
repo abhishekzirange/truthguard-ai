@@ -1,7 +1,7 @@
 # TruthGuard AI — Benchmark Evaluation Report
 
 **Evaluation Mode:** OFFLINE DETERMINISTIC & LOCAL ENGINE (Deterministic SemVer, Corroboration, Heuristics)  
-**Date:** 2026-11-02 16:46:48 UTC  
+**Date:** 2026-11-02 17:34:06 UTC  
 
 ## 1. Classification Metrics (100 Human-Reviewed Claims)
 
@@ -23,8 +23,8 @@
 ## 2. Latency and Telemetry Audit
 
 ### A. Offline Local Processing Latency
-- **Local CPU/Database Processing Latency:** 20.9 ms / claim
-- **Total Benchmark Runtime (100 Claims):** 2.20 seconds
+- **Local CPU/Database Processing Latency:** 16.7 ms / claim
+- **Total Benchmark Runtime (100 Claims):** 1.77 seconds
 - **External Network Calls:** 0
 - **External Billed Tokens:** 0 input, 0 output
 - **Externally Billed Cost:** $0.000000 USD (Offline Local Execution — 0 External Tokens Billed)

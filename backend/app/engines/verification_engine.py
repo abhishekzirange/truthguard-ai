@@ -307,7 +307,7 @@ class ClaimVerificationEngine:
 
         # 3. General Outdated / Supersession Patterns -> OUTDATED
         # A. Leadership succession / departure
-        if re.search(r"\b((is |are )?(currently )?(run by|led by|headed by)|is (the )?(current )?(\w+ )?(ceo|president|leader|director|executive|chairman)|leads|heads)\b", claim_lower):
+        if re.search(r"\b((is |are )?(currently )?(run|led|headed)(\s+and\s+operated)?\s+by|is (the )?(current )?(\w+ )?(ceo|president|leader|director|executive|chairman)|leads|heads|owned and operated by)\b", claim_lower):
             if re.search(r"\b(stepped down|resigned|succeeded by|former (ceo|president)|passed away|replaced by|left the role|was terminated|ousted|departed)\b", combined_evidence):
                 return {
                     "verdict": "OUTDATED",
@@ -322,8 +322,8 @@ class ClaimVerificationEngine:
                 }
 
         # B. Geopolitical / Treaty status change
-        if re.search(r"\b(member state of (the )?european union|formal member state|current (active )?(legal )?framework|active agreement|valid framework)\b", claim_lower):
-            if re.search(r"\b(officially left|withdrew from|invalidated|struck down|no longer in force|obsolete|superseded)\b", combined_evidence):
+        if re.search(r"\b(member state of (the )?european union|formal member state|(active|valid)(\s+and\s+valid)?\s+(legal\s+)?framework|active agreement|valid framework)\b", claim_lower):
+            if re.search(r"\b(officially left|withdrew from|invalidate[ds]?|struck down|no longer in force|obsolete|superseded)\b", combined_evidence):
                 return {
                     "verdict": "OUTDATED",
                     "provenance": "OFFLINE_HEURISTIC_ANALYSIS",

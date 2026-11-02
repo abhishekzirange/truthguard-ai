@@ -215,6 +215,15 @@ DEMO_GROUND_TRUTH_EVIDENCE = {
             "score": 0.98,
         }
     ],
+    "gpt-4": [
+        {
+            "title": "OpenAI Pricing: Models and API Rates",
+            "url": "https://openai.com/api/pricing/",
+            "content": "GPT-4o pricing is $2.50 per 1M input tokens and $10.00 per 1M output tokens. Legacy GPT-4 pricing was $30 per 1M input tokens and has been superseded.",
+            "published_at": "2024-10-01T00:00:00Z",
+            "score": 0.98,
+        }
+    ],
     "gpt-4o": [
         {
             "title": "OpenAI Pricing: Models and API Rates",
@@ -305,6 +314,15 @@ DEMO_GROUND_TRUTH_EVIDENCE = {
             "score": 1.0,
         }
     ],
+    "privacy shield": [
+        {
+            "title": "Court of Justice of the European Union: Schrems II Judgment",
+            "url": "https://curia.europa.eu/jcms/jcms/p1_3160867/en/",
+            "content": "The Court of Justice invalidates Decision 2016/1250 on the adequacy of the protection provided by the EU-US Privacy Shield. The EU-US Data Privacy Framework replaced it in July 2023.",
+            "published_at": "2023-07-10T00:00:00Z",
+            "score": 1.0,
+        }
+    ],
     "hipaa": [
         {
             "title": "HHS Health Information Privacy - HIPAA Regulations",
@@ -345,7 +363,7 @@ DEMO_GROUND_TRUTH_EVIDENCE = {
         {
             "title": "X / Twitter Leadership and Executive Structure",
             "url": "https://about.x.com/",
-            "content": "Linda Yaccarino serves as the Chief Executive Officer of X (formerly Twitter). Parag Agrawal was terminated in October 2022 when Elon Musk acquired the company. Verified checkmarks are paid via X Premium.",
+            "content": "Linda Yaccarino serves as the Chief Executive Officer of X (formerly Twitter). Jack Dorsey stepped down as CEO in November 2021. Parag Agrawal was terminated in October 2022 when Elon Musk acquired the company. Verified checkmarks are paid via X Premium.",
             "published_at": "2024-06-01T00:00:00Z",
             "score": 0.95,
         }
