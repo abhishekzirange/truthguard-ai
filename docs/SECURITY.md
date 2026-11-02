@@ -23,3 +23,4 @@ Retrieved web pages are treated as untrusted text payloads. Attackers frequently
 ### D. SQL Injection & Cross-Site Scripting (XSS)
 - All database queries use SQLAlchemy parameterized queries and ORM mappings.
 - React frontend uses JSX escaping by default; no `dangerouslySetInnerHTML` on untrusted evidence snippets.
+

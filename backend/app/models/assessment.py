@@ -12,6 +12,7 @@ class ClaimAssessment(Base):
     claim_id = Column(String(36), ForeignKey("claims.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
     
     verdict = Column(String(50), nullable=False)  # CURRENT, OUTDATED, CONTRADICTED, UNVERIFIED, TIME_SENSITIVE
+    provenance = Column(String(50), nullable=True, default="OFFLINE_DETERMINISTIC")  # LIVE_BIFROST, OFFLINE_DETERMINISTIC, OFFLINE_HEURISTIC_ANALYSIS, MOCK
     freshness_score = Column(Float, nullable=True)  # 0.0 - 100.0 or None if date unknown
     evidence_quality_score = Column(Float, nullable=True)  # 0.0 - 100.0
     reasoning = Column(Text, nullable=False)
@@ -25,3 +26,4 @@ class ClaimAssessment(Base):
 
     # Relationships
     claim = relationship("Claim", back_populates="assessment")
+

@@ -18,3 +18,4 @@ def get_verification_history(
     Returns historical verification runs with summary stats and timestamps.
     """
     return HistoryService.get_runs(db, skip=skip, limit=limit)
+

@@ -71,3 +71,4 @@ TruthGuard AI is engineered as a **Modular Monolith** prioritizing reliability, 
 
 ## 3. Data Persistence Design
 PostgreSQL 16 relational database with UUID primary keys, foreign key constraints, indexes on verification runs and timestamps, and JSON fields for structured metadata. Includes automatic fallback to SQLite for local lightweight testing if PostgreSQL is not running.
+

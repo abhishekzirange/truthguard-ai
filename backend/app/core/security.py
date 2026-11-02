@@ -60,3 +60,4 @@ def sanitize_untrusted_text(text: str) -> str:
         clean = clean[:2500] + " [truncated by TruthGuard security filter]"
         
     return clean
+

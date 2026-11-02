@@ -18,12 +18,13 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url with environment configuration
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Configure sqlalchemy.url dynamically from config option, environment variable, or settings
+_resolved_url = config.get_main_option("sqlalchemy.url") or os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+config.set_main_option("sqlalchemy.url", _resolved_url)
 
 
 def run_migrations_offline() -> None:
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option("sqlalchemy.url") or os.environ.get("DATABASE_URL") or settings.DATABASE_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -37,7 +38,8 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = settings.DATABASE_URL
+    url = config.get_main_option("sqlalchemy.url") or os.environ.get("DATABASE_URL") or settings.DATABASE_URL
+    configuration["sqlalchemy.url"] = url
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -48,7 +50,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            render_as_batch=True if "sqlite" in settings.DATABASE_URL else False
+            render_as_batch=True if "sqlite" in url else False
         )
 
         with context.begin_transaction():

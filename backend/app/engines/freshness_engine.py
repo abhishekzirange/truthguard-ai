@@ -102,3 +102,4 @@ class FreshnessEngine:
         avg_quality = round(sum(quality_scores) / len(quality_scores), 1) if quality_scores else 50.0
 
         return avg_freshness, avg_quality
+

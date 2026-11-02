@@ -84,3 +84,4 @@ async def create_batch_verification(
         run = await service.execute_verification(req)
         results.append(run)
     return results
+

@@ -14,3 +14,4 @@ class IntegrationsReport(BaseModel):
     tavily: IntegrationStatus
     bifrost: IntegrationStatus
     database: IntegrationStatus
+

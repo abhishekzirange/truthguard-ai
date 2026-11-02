@@ -94,3 +94,4 @@ class MetricsService:
             "category_distribution": cat_metrics,
             "recent_problematic_claims": recent_problems,
         }
+

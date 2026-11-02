@@ -89,21 +89,39 @@ $$\text{Evidence Quality} = 100 \times \left( 0.45 \cdot S + 0.35 \cdot R + 0.20
 
 ---
 
-## 4. Testing & Verification Benchmark
+## 4. Testing, Telemetry & Verification Benchmark
 
 ### 100-Claim Human-Reviewed Reference Benchmark
-TruthGuard was evaluated against an independently human-reviewed dataset of 100 factual assertions across 6 categories:
+TruthGuard AI was evaluated against an independently human-reviewed dataset of 100 factual assertions across 6 categories (Software versions, API specs, Pricing, Regulations, Leadership, General tech facts).
 
-| Metric | Unverified AI Baseline | TruthGuard AI |
+#### A. Measured Offline Benchmark (Local Engine Execution)
+Tested without external API dependencies to measure deterministic algorithmic performance and local compute overhead:
+
+| Metric | Unverified AI Baseline | TruthGuard AI (Offline Mode) |
 | :--- | :--- | :--- |
-| **Outdated Detection Recall** | 0.0% | **84.00%** (21/25 outdated claims caught) |
-| **Detection Precision** | 0.0% | **91.30%** |
-| **F1 Score** | 0.000 | **0.875** |
-| **False Positive Rate** | N/A | **2.67%** |
-| **Average Latency** | Instant (Blind) | **12.9 ms / claim** |
-| **Estimated Cost** | $0.00 | **$0.000250 USD / verification** |
+| **Outdated Detection Recall** | 0.0% | **48.00%** (12/25 outdated claims detected) |
+| **Detection Precision** | 0.0% | **80.00%** (12/15) |
+| **F1 Score** | 0.000 | **0.600** |
+| **False Positive Rate** | N/A | **4.00%** (3/75) |
+| **Local Processing Latency** | Instant (Blind) | **12.5 ms / claim** (Local CPU/SQLite) |
+| **Billed External Tokens** | 0 tokens | **0 tokens** (Offline execution) |
+| **Externally Billed Cost** | $0.00 | **$0.000000 USD** |
 
-*All 20 specified test scenarios pass with 100% reliability (`pytest tests/test_all_20_scenarios.py`).*
+#### Confusion Matrix (Outdated Detection)
+| | Ground Truth OUTDATED | Ground Truth NOT OUTDATED |
+| :--- | :--- | :--- |
+| **Predicted OUTDATED** | **TP = 12** | **FP = 3** |
+| **Predicted NOT OUTDATED** | **FN = 13** | **TN = 72** |
+
+#### B. Projected Live Pipeline Telemetry (Cloud Search + LLM Gateway)
+When deployed with live credentials (`TAVILY_API_KEY`, `BIFROST_API_KEY`):
+- **Tavily Web Search Roundtrip:** ~600 ms – 1,200 ms (network bound)
+- **Bifrost LLM Inference Gateway:** ~700 ms – 1,500 ms (model inference bound)
+- **Total Projected Live Pipeline Latency:** ~1,300 ms – 2,700 ms per claim
+- **Projected Live Cost:** ~$0.00015 – $0.00035 USD per claim (at standard gpt-4o-mini rates: $0.15/1M prompt tokens, $0.60/1M completion tokens)
+
+*Full regression suite passes with 100% reliability across all 77 unit, integration, and scenario tests (`pytest tests/`).*
+*Detailed breakdown available in [BENCHMARK_RESULTS.md](file:///c:/Users/Abhishek/Documents/Abhishek/truthguard-ai/docs/BENCHMARK_RESULTS.md) and [POST_AUDIT_FIX_REPORT.md](file:///c:/Users/Abhishek/Documents/Abhishek/truthguard-ai/docs/POST_AUDIT_FIX_REPORT.md).*
 
 ---
 
@@ -180,3 +198,4 @@ Open `http://localhost:5173` in your browser.
 ## 8. License & Team
 TruthGuard AI was engineered for the **AI Answer Freshness & Stale-Answer Detection Hackathon Challenge**.  
 Licensed under the **MIT License**.
+

@@ -23,3 +23,4 @@ def get_claim_evidence(
             detail="Claim not found"
         )
     return claim.evidence_items
+

@@ -149,3 +149,4 @@ class ClaimExtractionEngine:
 
         # Fallback to first word as subject
         return words[0], " ".join(words[1:3]), " ".join(words[3:])
+

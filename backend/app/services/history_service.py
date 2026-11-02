@@ -36,3 +36,4 @@ class HistoryService:
     @staticmethod
     def get_run_by_id(db: Session, run_id: str) -> Optional[VerificationRun]:
         return db.query(VerificationRun).filter(VerificationRun.id == run_id).first()
+

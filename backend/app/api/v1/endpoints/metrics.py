@@ -13,3 +13,4 @@ def get_metrics(db: Session = Depends(get_db)):
     Returns aggregated metrics, claim category breakdown, and cost estimation.
     """
     return MetricsService.get_dashboard_metrics(db)
+

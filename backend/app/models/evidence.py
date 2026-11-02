@@ -27,3 +27,4 @@ class Evidence(Base):
     
     # Relationships
     claim = relationship("Claim", back_populates="evidence_items")
+

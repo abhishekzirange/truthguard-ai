@@ -19,6 +19,7 @@ class ClaimBase(BaseModel):
 
 class ClaimAssessmentSchema(BaseModel):
     verdict: Literal["CURRENT", "OUTDATED", "CONTRADICTED", "UNVERIFIED", "TIME_SENSITIVE"]
+    provenance: Optional[str] = "OFFLINE_DETERMINISTIC"
     freshness_score: Optional[float] = None
     evidence_quality_score: Optional[float] = None
     reasoning: str

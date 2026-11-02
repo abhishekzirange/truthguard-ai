@@ -213,3 +213,4 @@ class BifrostAdapter:
         input_cost = (input_tokens / 1_000_000.0) * rates["input"]
         output_cost = (output_tokens / 1_000_000.0) * rates["output"]
         return round(input_cost + output_cost, 6)
+

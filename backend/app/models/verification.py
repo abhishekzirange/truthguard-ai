@@ -27,3 +27,4 @@ class VerificationRun(Base):
     claims = relationship("Claim", back_populates="run", cascade="all, delete-orphan", order_by="Claim.created_at")
     model_usages = relationship("ModelUsage", back_populates="run", cascade="all, delete-orphan")
     events = relationship("VerificationEvent", back_populates="run", cascade="all, delete-orphan", order_by="VerificationEvent.created_at")
+

@@ -1,3 +1,4 @@
+import re
 import time
 import logging
 from typing import List, Dict, Any, Optional
@@ -634,23 +635,68 @@ class TavilyAdapter:
                 "message": f"Connection failed: {str(e)}"
             }
 
+    @staticmethod
+    def validate_and_sanitize_url(url: str) -> Optional[tuple[str, str]]:
+        """
+        Validates external URLs for security:
+        - Allows only HTTP and HTTPS schemes.
+        - Strictly rejects javascript:, data:, file:, vbscript:, and other unsafe schemes.
+        - Validates hostnames against malformed syntax or control characters.
+        - Returns (sanitized_url, normalized_domain) or None if invalid.
+        """
+        if not url or not isinstance(url, str):
+            return None
+
+        clean_url = url.strip()
+        try:
+            parsed = urlparse(clean_url)
+        except Exception:
+            return None
+
+        scheme = parsed.scheme.lower()
+        if scheme not in ("http", "https"):
+            logger.warning(f"Rejected unsafe URL scheme: '{scheme}' in URL '{clean_url}'")
+            return None
+
+        netloc = parsed.netloc.strip().lower()
+        if not netloc or len(netloc) > 253:
+            return None
+
+        # Validate hostname characters (alphanumeric, dots, hyphens, optional colon for port)
+        if not re.match(r"^[a-z0-9\.\-:]+$", netloc):
+            logger.warning(f"Rejected URL with invalid characters in netloc: '{netloc}'")
+            return None
+
+        # Ensure hostname has at least one valid dot or is localhost
+        hostname = parsed.hostname or ""
+        if hostname != "localhost" and "." not in hostname:
+            return None
+
+        # Normalize domain
+        domain = hostname
+        if domain.startswith("www."):
+            domain = domain[4:]
+
+        return clean_url, domain
+
     def _normalize_results(self, raw_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         seen_urls = set()
         normalized = []
 
         for item in raw_results:
-            url = item.get("url", "").strip()
-            if not url or url in seen_urls:
+            raw_url = item.get("url", "").strip()
+            validated = self.validate_and_sanitize_url(raw_url)
+            if not validated:
                 continue
-            seen_urls.add(url)
 
-            domain = urlparse(url).netloc.lower()
-            if domain.startswith("www."):
-                domain = domain[4:]
+            clean_url, domain = validated
+            if clean_url in seen_urls:
+                continue
+            seen_urls.add(clean_url)
 
             normalized.append({
                 "title": item.get("title", "Web Source").strip(),
-                "url": url,
+                "url": clean_url,
                 "domain": domain,
                 "snippet": item.get("content", "").strip(),
                 "published_at": item.get("published_date"),
@@ -665,10 +711,13 @@ class TavilyAdapter:
         for key, evidence_list in DEMO_GROUND_TRUTH_EVIDENCE.items():
             if key in q:
                 for item in evidence_list:
-                    domain = urlparse(item["url"]).netloc.lower().replace("www.", "")
+                    validated = self.validate_and_sanitize_url(item.get("url", ""))
+                    if not validated:
+                        continue
+                    clean_url, domain = validated
                     results.append({
                         "title": item["title"],
-                        "url": item["url"],
+                        "url": clean_url,
                         "domain": domain,
                         "snippet": item["content"],
                         "published_at": item.get("published_at"),

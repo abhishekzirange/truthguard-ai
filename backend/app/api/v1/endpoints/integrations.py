@@ -40,3 +40,4 @@ async def get_integrations_status():
             message="Database operational (" + ("PostgreSQL" if "postgresql" in settings.DATABASE_URL else "SQLite") + ")"
         )
     )
+

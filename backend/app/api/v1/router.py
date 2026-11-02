@@ -16,3 +16,4 @@ api_router.include_router(history.router, prefix="/history", tags=["History"])
 api_router.include_router(metrics.router, prefix="/metrics", tags=["Metrics & Analytics"])
 api_router.include_router(health.router, prefix="/health", tags=["Health"])
 api_router.include_router(integrations.router, prefix="/integrations", tags=["Integrations"])
+

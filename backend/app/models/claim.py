@@ -29,3 +29,4 @@ class Claim(Base):
     run = relationship("VerificationRun", back_populates="claims")
     evidence_items = relationship("Evidence", back_populates="claim", cascade="all, delete-orphan")
     assessment = relationship("ClaimAssessment", back_populates="claim", uselist=False, cascade="all, delete-orphan")
+

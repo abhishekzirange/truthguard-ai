@@ -61,3 +61,4 @@ Where:
   1. Semantic consistency between claim and current evidence.
   2. Temporal precedence (does newer evidence supersede the claim?).
   3. Deterministic boundaries (semver comparison, price difference).
+

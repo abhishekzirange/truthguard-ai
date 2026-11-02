@@ -1,5 +1,11 @@
+import os
 import logging
-from app.database.session import engine, Base, SessionLocal
+from sqlalchemy import inspect, create_engine
+from sqlalchemy.orm import sessionmaker
+from alembic.config import Config
+from alembic import command
+from app.database.session import engine as default_engine, SessionLocal as default_SessionLocal
+from app.core.config import settings
 from app.models import SourceDomain
 
 logger = logging.getLogger("truthguard.init_db")
@@ -32,10 +38,46 @@ DEFAULT_AUTHORITATIVE_DOMAINS = [
 ]
 
 
-def init_database():
-    """Initializes tables and seeds initial domain reliability data."""
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
+def init_database(engine_to_use=None, db_url_to_use=None):
+    """
+    Safely initializes tables using Alembic migrations without duplicate table conflicts,
+    and seeds initial domain reliability data.
+    """
+    current_engine = engine_to_use or default_engine
+    db_url = db_url_to_use or (str(current_engine.url) if hasattr(current_engine, "url") else settings.DATABASE_URL)
+    
+    inspector = inspect(current_engine)
+    existing_tables = inspector.get_table_names()
+    
+    backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    alembic_ini_path = os.path.join(backend_dir, "alembic.ini")
+
+    if os.path.exists(alembic_ini_path):
+        alembic_cfg = Config(alembic_ini_path)
+        alembic_cfg.set_main_option("sqlalchemy.url", db_url)
+        
+        if "alembic_version" not in existing_tables:
+            if "verification_runs" in existing_tables or "claims" in existing_tables:
+                logger.info("Existing schema detected without alembic_version; stamping head.")
+                command.stamp(alembic_cfg, "head")
+            else:
+                logger.info("Clean database detected; applying Alembic migrations to head.")
+                command.upgrade(alembic_cfg, "head")
+        else:
+            logger.info("Alembic version table detected; upgrading to head.")
+            command.upgrade(alembic_cfg, "head")
+    else:
+        logger.warning(f"alembic.ini not found at {alembic_ini_path}; falling back to metadata create_all.")
+        from app.database.session import Base
+        Base.metadata.create_all(bind=current_engine)
+
+    # Seed default authoritative domains if not present
+    if engine_to_use:
+        session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine_to_use)
+        db = session_factory()
+    else:
+        db = default_SessionLocal()
+
     try:
         existing_count = db.query(SourceDomain).count()
         if existing_count == 0:
@@ -55,4 +97,4 @@ def init_database():
 
 if __name__ == "__main__":
     init_database()
-    print("Database tables initialized successfully!")
+    print("Database tables initialized successfully via Alembic migrations!")

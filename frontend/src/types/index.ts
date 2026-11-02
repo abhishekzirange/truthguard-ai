@@ -141,3 +141,4 @@ export interface IntegrationsReport {
   bifrost: IntegrationStatus;
   database: IntegrationStatus;
 }
+

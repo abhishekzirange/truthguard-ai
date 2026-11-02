@@ -51,3 +51,4 @@ LLMs suffer from knowledge cutoff, hallucination of version numbers, stale prici
 - **AI Application Developers:** Test and guardrail prompt outputs in production to prevent user misinformation.
 - **Enterprise Researchers & Analysts:** Instantly audit LLM-synthesized market, regulatory, and pricing data.
 - **End Users & Judges:** Paste any LLM answer and receive verifiable truth with clickable primary sources.
+

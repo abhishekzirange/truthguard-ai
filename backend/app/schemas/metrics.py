@@ -40,3 +40,4 @@ class MetricsResponse(BaseModel):
     status_distribution: StatusDistribution
     category_distribution: List[CategoryMetric] = []
     recent_problematic_claims: List[ProblematicClaim] = []
+

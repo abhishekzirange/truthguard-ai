@@ -74,3 +74,4 @@ export async function getIntegrationsStatus(): Promise<IntegrationsReport> {
   }
   return response.json();
 }
+

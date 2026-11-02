@@ -237,3 +237,4 @@ async def test_scenario_20_historical_report_retrieval():
         assert single.id == runs[0]["id"]
     finally:
         db.close()
+

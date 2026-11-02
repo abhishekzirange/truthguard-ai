@@ -178,6 +178,7 @@ class VerificationService:
                     id=str(uuid.uuid4()),
                     claim_id=claim_id,
                     verdict=verdict,
+                    provenance=assessment_result.get("provenance", "OFFLINE_DETERMINISTIC"),
                     freshness_score=assessment_result.get("freshness_score"),
                     evidence_quality_score=assessment_result.get("evidence_quality_score"),
                     reasoning=assessment_result.get("reasoning", ""),
@@ -189,15 +190,16 @@ class VerificationService:
                 )
                 self.db.add(assessment_model)
 
-            # Record model usage
+            # Record model usage honestly (0 tokens when running offline fallback)
+            is_live = bool(self.bifrost_adapter.api_key)
             usage = ModelUsage(
                 id=str(uuid.uuid4()),
                 run_id=run.id,
-                model=self.bifrost_adapter.model,
-                provider="bifrost",
-                input_tokens=150 * len(extracted_claims_data),
-                output_tokens=80 * len(extracted_claims_data),
-                estimated_cost=0.0002 * len(extracted_claims_data),
+                model=self.bifrost_adapter.model if is_live else "local-deterministic-engine",
+                provider="bifrost" if is_live else "offline_local",
+                input_tokens=150 * len(extracted_claims_data) if is_live else 0,
+                output_tokens=80 * len(extracted_claims_data) if is_live else 0,
+                estimated_cost=0.0002 * len(extracted_claims_data) if is_live else 0.0,
                 latency_ms=int((time.time() - start_time) * 1000)
             )
             self.db.add(usage)

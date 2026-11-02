@@ -44,3 +44,4 @@ Welcome to **TruthGuard AI**: *Don't Trust. Verify.* We built an autonomous veri
 - It's Dockerized, hardened against prompt injection, and ready for production API integration.
 
 TruthGuard AI turns blind AI faith into verifiable truth. Thank you!"
+

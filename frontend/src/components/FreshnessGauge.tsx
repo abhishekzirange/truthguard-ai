@@ -54,3 +54,4 @@ export const FreshnessGauge: React.FC<FreshnessGaugeProps> = ({
     </div>
   );
 };
+

@@ -1,0 +1,330 @@
+{
+  "confusion_matrix": {
+    "CURRENT": {
+      "CURRENT": 47,
+      "OUTDATED": 2,
+      "CONTRADICTED": 0,
+      "UNVERIFIED": 8,
+      "TIME_SENSITIVE": 0
+    },
+    "OUTDATED": {
+      "CURRENT": 4,
+      "OUTDATED": 21,
+      "CONTRADICTED": 0,
+      "UNVERIFIED": 0,
+      "TIME_SENSITIVE": 0
+    },
+    "CONTRADICTED": {
+      "CURRENT": 5,
+      "OUTDATED": 0,
+      "CONTRADICTED": 6,
+      "UNVERIFIED": 6,
+      "TIME_SENSITIVE": 0
+    },
+    "UNVERIFIED": {
+      "CURRENT": 0,
+      "OUTDATED": 0,
+      "CONTRADICTED": 0,
+      "UNVERIFIED": 1,
+      "TIME_SENSITIVE": 0
+    },
+    "TIME_SENSITIVE": {
+      "CURRENT": 0,
+      "OUTDATED": 0,
+      "CONTRADICTED": 0,
+      "UNVERIFIED": 0,
+      "TIME_SENSITIVE": 0
+    }
+  },
+  "class_metrics": {
+    "CURRENT": {
+      "tp": 47,
+      "fn": 10,
+      "fp": 9,
+      "tn": 34,
+      "precision": 0.8392857142857143,
+      "recall": 0.8245614035087719,
+      "f1": 0.8318584070796461,
+      "support": 57
+    },
+    "OUTDATED": {
+      "tp": 21,
+      "fn": 4,
+      "fp": 2,
+      "tn": 73,
+      "precision": 0.9130434782608695,
+      "recall": 0.84,
+      "f1": 0.8749999999999999,
+      "support": 25
+    },
+    "CONTRADICTED": {
+      "tp": 6,
+      "fn": 11,
+      "fp": 0,
+      "tn": 83,
+      "precision": 1.0,
+      "recall": 0.35294117647058826,
+      "f1": 0.5217391304347826,
+      "support": 17
+    },
+    "UNVERIFIED": {
+      "tp": 1,
+      "fn": 0,
+      "fp": 14,
+      "tn": 85,
+      "precision": 0.06666666666666667,
+      "recall": 1.0,
+      "f1": 0.125,
+      "support": 1
+    },
+    "TIME_SENSITIVE": {
+      "tp": 0,
+      "fn": 0,
+      "fp": 0,
+      "tn": 100,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 0
+    }
+  },
+  "overall_accuracy": 0.75,
+  "macro_f1": 0.5883993843786072,
+  "outdated_recall": 0.84,
+  "outdated_precision": 0.9130434782608695,
+  "outdated_f1": 0.8749999999999999,
+  "outdated_fpr": 0.02666666666666667,
+  "avg_latency_ms": 14.15278434753418,
+  "category_results": {
+    "software_version": {
+      "total": 25,
+      "correct": 23
+    },
+    "pricing": {
+      "total": 20,
+      "correct": 10
+    },
+    "regulation": {
+      "total": 20,
+      "correct": 12
+    },
+    "company_info": {
+      "total": 15,
+      "correct": 14
+    },
+    "technical_docs": {
+      "total": 10,
+      "correct": 7
+    },
+    "general_technical": {
+      "total": 7,
+      "correct": 6
+    },
+    "general_fact": {
+      "total": 3,
+      "correct": 3
+    }
+  },
+  "mismatches": [
+    {
+      "id": "claim-005",
+      "text": "React 16 is the newest major release of React.",
+      "category": "software_version",
+      "ground_truth": "OUTDATED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-020",
+      "text": "Docker Engine 1.13 is the modern version of Docker.",
+      "category": "software_version",
+      "ground_truth": "OUTDATED",
+      "predicted": "CURRENT",
+      "reasoning": "Claimed version 1.13 belongs to current official release 1.13."
+    },
+    {
+      "id": "claim-030",
+      "text": "OpenAI GPT-3 DaVinci model costs $0.06 per 1,000 tokens.",
+      "category": "pricing",
+      "ground_truth": "OUTDATED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-031",
+      "text": "Google Cloud Storage standard tier costs $50 per gigabyte per month.",
+      "category": "pricing",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-034",
+      "text": "Twitter Blue subscription was always free for verified public figures.",
+      "category": "pricing",
+      "ground_truth": "OUTDATED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-036",
+      "text": "Vercel Hobby plan is $20 per month.",
+      "category": "pricing",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-037",
+      "text": "ChatGPT Plus costs $20 per month.",
+      "category": "pricing",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-040",
+      "text": "Amazon S3 Glacier Flexible Retrieval retrieval rate is $1,000 per GB.",
+      "category": "pricing",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-041",
+      "text": "PostgreSQL database license costs $5,000 per CPU core.",
+      "category": "pricing",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-042",
+      "text": "Redis open-source license transitioned away from BSD in 2024.",
+      "category": "pricing",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-043",
+      "text": "Elasticsearch transitioned back to including AGPL open source options in 2024.",
+      "category": "pricing",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-045",
+      "text": "Databricks community edition is a paid-only product with no free access tier.",
+      "category": "pricing",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-051",
+      "text": "The EU-US Data Privacy Framework was adopted by the European Commission in 2023.",
+      "category": "regulation",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-053",
+      "text": "SOX compliance only applies to private LLCs with fewer than 10 employees.",
+      "category": "regulation",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-054",
+      "text": "PCI-DSS v4.0 replaced v3.2.1 as the active payment card standard in 2024.",
+      "category": "regulation",
+      "ground_truth": "CURRENT",
+      "predicted": "OUTDATED",
+      "reasoning": "Authoritative sources indicate 'v3.2.1' has been superseded or reached End-of-Life."
+    },
+    {
+      "id": "claim-057",
+      "text": "Copyright law in the United States grants 1,000 years of protection to software algorithms.",
+      "category": "regulation",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-060",
+      "text": "FCC announced the complete shutdown of the global internet in 2024.",
+      "category": "regulation",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-061",
+      "text": "Corporate income tax was abolished worldwide by the United Nations in 2020.",
+      "category": "regulation",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-062",
+      "text": "OECD Pillar Two establishes a 15% global minimum corporate tax rate.",
+      "category": "regulation",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-065",
+      "text": "FDA requires clinical trials before new medical pharmaceuticals are distributed in the US.",
+      "category": "regulation",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-077",
+      "text": "Adobe completed its acquisition of Figma after regulatory approval.",
+      "category": "company_info",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "CURRENT",
+      "reasoning": "Corroborated by official primary documentation and reliable technical sources."
+    },
+    {
+      "id": "claim-083",
+      "text": "Kubernetes 1.20 deprecated dockershim.",
+      "category": "technical_docs",
+      "ground_truth": "CURRENT",
+      "predicted": "OUTDATED",
+      "reasoning": "Claimed version 1.20 is superseded by official release 1.31."
+    },
+    {
+      "id": "claim-092",
+      "text": "Redis operates primarily as an in-memory data store.",
+      "category": "technical_docs",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-097",
+      "text": "Virtual machines run a full guest operating system on hypervisor virtualization.",
+      "category": "general_technical",
+      "ground_truth": "CURRENT",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    },
+    {
+      "id": "claim-098",
+      "text": "REST APIs universally require SOAP envelope wrappers.",
+      "category": "technical_docs",
+      "ground_truth": "CONTRADICTED",
+      "predicted": "UNVERIFIED",
+      "reasoning": "No authoritative web evidence could be retrieved for this claim."
+    }
+  ]
+}

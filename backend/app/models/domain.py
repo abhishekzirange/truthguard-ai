@@ -11,3 +11,4 @@ class SourceDomain(Base):
     source_type = Column(String(50), default="secondary", nullable=False)  # primary, authoritative, secondary, blog, low
     reliability_score = Column(Float, default=0.5, nullable=False)  # 0.0 to 1.0
     category = Column(String(100), nullable=True)
+

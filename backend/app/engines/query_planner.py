@@ -54,3 +54,4 @@ class QueryPlanner:
             "preferred_domains": preferred_domains,
             "search_depth": "advanced" if claim.get("temporal_sensitivity") == "HIGH" else "basic"
         }
+

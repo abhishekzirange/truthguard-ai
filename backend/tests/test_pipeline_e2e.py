@@ -46,3 +46,4 @@ async def test_end_to_end_verification_pipeline():
                 print(f"   Correction: {c.assessment.suggested_correction}")
     finally:
         db.close()
+

@@ -193,15 +193,21 @@ export const EvidenceExplorerPage: React.FC = () => {
               {evidenceList.map((ev, i) => (
                 <div key={ev.id || i} className="rounded-xl bg-slate-950/80 border border-slate-800 p-3.5 text-xs space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <a
-                      href={ev.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold text-slate-200 hover:text-teal-400 transition-colors flex items-center gap-1 leading-snug"
-                    >
-                      <span>{ev.source_title}</span>
-                      <ExternalLink className="h-3 w-3 shrink-0 text-slate-500" />
-                    </a>
+                    {ev.source_url && (ev.source_url.startsWith('http://') || ev.source_url.startsWith('https://')) ? (
+                      <a
+                        href={ev.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-slate-200 hover:text-teal-400 transition-colors flex items-center gap-1 leading-snug"
+                      >
+                        <span>{ev.source_title}</span>
+                        <ExternalLink className="h-3 w-3 shrink-0 text-slate-500" />
+                      </a>
+                    ) : (
+                      <span className="font-semibold text-slate-400 flex items-center gap-1 leading-snug">
+                        <span>{ev.source_title}</span>
+                      </span>
+                    )}
                   </div>
 
                   <p className="text-slate-300 text-[11px] leading-relaxed bg-slate-900/60 p-2 rounded border border-slate-800/60">
@@ -279,3 +285,4 @@ export const EvidenceExplorerPage: React.FC = () => {
     </div>
   );
 };
+

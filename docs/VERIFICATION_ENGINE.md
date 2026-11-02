@@ -61,3 +61,4 @@ TruthGuard AI does not rely exclusively on LLM prompts for reasoning. It combine
 
 ### Prompt Injection Shield
 Retrieved evidence texts are treated as **Untrusted Data Payloads**. They are strictly wrapped in XML data wrappers `<evidence_data id="..."></evidence_data>` and filtered for adversarial prompt override keywords (`"ignore previous instructions"`, `"system prompt"`, `"you are now"`). The LLM is constrained to output solely validated JSON with real referenced evidence IDs.
+
