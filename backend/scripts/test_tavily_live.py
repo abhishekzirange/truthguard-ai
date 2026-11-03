@@ -177,3 +177,4 @@ def _write_doc(success: bool, status_code: int, latency_ms: int, query: str, err
 
 if __name__ == "__main__":
     asyncio.run(run_tavily_test())
+
