@@ -154,8 +154,11 @@ class VerificationService:
                 is_search_live = search_res.get("live_success", False)
                 if is_search_live and assessment_prov == "LIVE_BIFROST":
                     claim_provenance = "LIVE_TAVILY_BIFROST"
-                elif is_search_live and assessment_prov != "LIVE_BIFROST":
-                    claim_provenance = "OFFLINE_DETERMINISTIC" if assessment_prov == "OFFLINE_DETERMINISTIC" else "PARTIAL_TAVILY_ONLY"
+                elif is_search_live:
+                    if self.bifrost_adapter.api_key:
+                        claim_provenance = "OFFLINE_DETERMINISTIC" if assessment_prov == "OFFLINE_DETERMINISTIC" else "PARTIAL_TAVILY_ONLY"
+                    else:
+                        claim_provenance = "LIVE_TAVILY_DETERMINISTIC" if assessment_prov == "OFFLINE_DETERMINISTIC" else "LIVE_TAVILY"
                 elif not is_search_live and assessment_prov == "LIVE_BIFROST":
                     claim_provenance = "PARTIAL_BIFROST_ONLY"
                 else:
@@ -233,7 +236,10 @@ class VerificationService:
             # Determine overall execution mode
             if tavily_live_success_count > 0 and bifrost_live_success_count > 0:
                 run.execution_mode = "LIVE"
-            elif tavily_live_success_count > 0 or bifrost_live_success_count > 0:
+            elif tavily_live_success_count > 0:
+                # If Bifrost was configured but failed -> PARTIAL; If Bifrost is unconfigured (Tavily track) -> LIVE
+                run.execution_mode = "PARTIAL" if self.bifrost_adapter.api_key else "LIVE"
+            elif bifrost_live_success_count > 0:
                 run.execution_mode = "PARTIAL"
             else:
                 run.execution_mode = "OFFLINE"

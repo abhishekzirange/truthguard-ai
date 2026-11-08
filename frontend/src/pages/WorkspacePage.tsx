@@ -125,13 +125,12 @@ export const WorkspacePage: React.FC = () => {
   };
 
   const isTavilyLive = Boolean(integrations?.tavily?.configured && integrations?.tavily?.reachable);
+  const isBifrostConfigured = Boolean(integrations?.bifrost?.configured);
   const isBifrostLive = Boolean(integrations?.bifrost?.configured && integrations?.bifrost?.reachable);
 
-  const activeMode = (isTavilyLive && isBifrostLive)
-    ? 'LIVE'
-    : (isTavilyLive || isBifrostLive)
-    ? 'PARTIAL'
-    : 'OFFLINE';
+  const activeMode = isTavilyLive
+    ? (isBifrostConfigured && !isBifrostLive ? 'PARTIAL' : 'LIVE')
+    : (isBifrostLive ? 'PARTIAL' : 'OFFLINE');
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">

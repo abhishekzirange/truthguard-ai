@@ -142,12 +142,12 @@ export const ResultsPage: React.FC = () => {
                   ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
                   : 'border-slate-700 bg-slate-800 text-slate-400'
               }`}>
-                {execMode === 'LIVE' ? 'LIVE_TAVILY_BIFROST' : execMode === 'PARTIAL' ? 'PARTIAL_EXTERNAL' : 'OFFLINE_DETERMINISTIC'}
+                {execMode === 'LIVE' ? (run.claims[0]?.assessment?.provenance || 'LIVE_TAVILY') : execMode === 'PARTIAL' ? 'PARTIAL_EXTERNAL' : 'OFFLINE_DETERMINISTIC'}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {execMode === 'LIVE'
-                ? 'Ground-truth verified via real-time Tavily search retrieval and Bifrost AI Gateway consensus.'
+                ? 'Ground-truth verified via real-time Tavily search retrieval and authoritative web consensus.'
                 : execMode === 'PARTIAL'
                 ? 'Executed with partial external API connectivity. Missing components fell back safely to deterministic rules.'
                 : 'Executed in offline deterministic mode with PEP 440 SemVer parsing, pattern consensus, and verified corpus.'}
