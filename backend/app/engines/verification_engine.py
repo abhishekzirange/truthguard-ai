@@ -22,7 +22,8 @@ class ClaimVerificationEngine:
         self,
         claim: Dict[str, Any],
         evidence_list: List[Dict[str, Any]],
-        freshness_policy: str = "standard"
+        freshness_policy: str = "standard",
+        is_live_search: bool = False,
     ) -> Dict[str, Any]:
         """
         Assesses a claim against retrieved normalized evidence.
@@ -40,6 +41,7 @@ class ClaimVerificationEngine:
         if not evidence_list:
             return {
                 "verdict": "UNVERIFIED",
+                "provenance": "LIVE_TAVILY" if is_live_search else "OFFLINE_LOCAL",
                 "freshness_score": None,
                 "evidence_quality_score": 15.0,
                 "reasoning": "No authoritative web evidence could be retrieved for this claim.",
@@ -85,12 +87,15 @@ class ClaimVerificationEngine:
                 sup_ids = [ev_ids[0]] if ver_result["verdict"] == "CURRENT" and ev_ids else []
                 con_ids = [ev_ids[0]] if ver_result["verdict"] in ["OUTDATED", "CONTRADICTED"] and ev_ids else []
 
+                tag = "[LIVE TAVILY DETERMINISTIC]" if is_live_search else "[OFFLINE DETERMINISTIC]"
+                prov = "LIVE_TAVILY_DETERMINISTIC" if is_live_search else "OFFLINE_DETERMINISTIC"
+
                 return {
                     "verdict": ver_result["verdict"],
-                    "provenance": "OFFLINE_DETERMINISTIC",
+                    "provenance": prov,
                     "freshness_score": avg_freshness,
                     "evidence_quality_score": avg_quality,
-                    "reasoning": f"[OFFLINE DETERMINISTIC] {ver_result['reasoning']}",
+                    "reasoning": f"{tag} {ver_result['reasoning']}",
                     "suggested_correction": correction,
                     "supporting_evidence_ids": sup_ids,
                     "contradicting_evidence_ids": con_ids,
@@ -105,12 +110,14 @@ class ClaimVerificationEngine:
                 curr_price = price_result.get("current_price")
                 is_contradicted = (price_result["verdict"] == "CONTRADICTED")
                 ev_ids = list(valid_evidence_map.keys())
+                tag = "[LIVE TAVILY DETERMINISTIC]" if is_live_search else "[OFFLINE DETERMINISTIC]"
+                prov = "LIVE_TAVILY_DETERMINISTIC" if is_live_search else "OFFLINE_DETERMINISTIC"
                 return {
                     "verdict": price_result["verdict"],
-                    "provenance": "OFFLINE_DETERMINISTIC",
+                    "provenance": prov,
                     "freshness_score": avg_freshness,
                     "evidence_quality_score": avg_quality,
-                    "reasoning": f"[OFFLINE DETERMINISTIC] {price_result['reasoning']}",
+                    "reasoning": f"{tag} {price_result['reasoning']}",
                     "suggested_correction": f"Current official price is ${curr_price}." if is_contradicted and curr_price else None,
                     "supporting_evidence_ids": [ev_ids[0]] if not is_contradicted and ev_ids else [],
                     "contradicting_evidence_ids": [ev_ids[0]] if is_contradicted and ev_ids else [],
@@ -122,7 +129,7 @@ class ClaimVerificationEngine:
             try:
                 llm_eval = await self._verify_via_bifrost(claim_text, sanitized_snippets, valid_evidence_map)
                 if llm_eval:
-                    llm_eval["provenance"] = "LIVE_BIFROST"
+                    llm_eval["provenance"] = "LIVE_TAVILY_BIFROST" if is_live_search else "LIVE_BIFROST"
                     llm_eval["freshness_score"] = avg_freshness
                     llm_eval["evidence_quality_score"] = avg_quality
                     return llm_eval
@@ -130,7 +137,7 @@ class ClaimVerificationEngine:
                 logger.warning(f"Bifrost verification call failed: {e}. Falling back to offline heuristic reasoning.")
 
         # Step 5: Heuristic Semantic Consensus Fallback
-        return self._heuristic_consensus(claim, evidence_list, avg_freshness, avg_quality)
+        return self._heuristic_consensus(claim, evidence_list, avg_freshness, avg_quality, is_live_search=is_live_search)
 
     async def _verify_via_bifrost(
         self,
@@ -189,7 +196,8 @@ class ClaimVerificationEngine:
         claim: Dict[str, Any],
         evidence_list: List[Dict[str, Any]],
         avg_freshness: Optional[float],
-        avg_quality: float
+        avg_quality: float,
+        is_live_search: bool = False
     ) -> Dict[str, Any]:
         """
         General-purpose linguistic evidence consensus engine for offline testing or fallback mode.
@@ -201,16 +209,21 @@ class ClaimVerificationEngine:
         category = claim.get("category", "")
         ev_id = evidence_list[0].get("id", "1") if evidence_list else "1"
         
-        offline_prefix = "[OFFLINE HEURISTIC ANALYSIS - Live Bifrost Gateway Unavailable]"
+        if is_live_search:
+            prefix = "[LIVE TAVILY CONSENSUS]"
+            provenance = "LIVE_TAVILY"
+        else:
+            prefix = "[OFFLINE HEURISTIC ANALYSIS]"
+            provenance = "OFFLINE_HEURISTIC_ANALYSIS"
 
         # Guard: Insufficient or missing evidence
         if not evidence_list:
             return {
                 "verdict": "UNVERIFIED",
-                "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                "provenance": provenance,
                 "freshness_score": None,
                 "evidence_quality_score": 15.0,
-                "reasoning": f"{offline_prefix} Insufficient evidence: No web evidence sources could be retrieved to verify this claim.",
+                "reasoning": f"{prefix} Insufficient evidence: No web evidence sources could be retrieved to verify this claim.",
                 "suggested_correction": None,
                 "supporting_evidence_ids": [],
                 "contradicting_evidence_ids": [],
@@ -232,10 +245,10 @@ class ClaimVerificationEngine:
                 if any(w in claim_lower for w in ["acquire", "merger", "buy", "launch", "release", "unannounced", "secret"]):
                     return {
                         "verdict": "UNVERIFIED",
-                        "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                        "provenance": provenance,
                         "freshness_score": None,
                         "evidence_quality_score": 30.0,
-                        "reasoning": f"{offline_prefix} Assertion involves unconfirmed speculation or future predictions lacking regulatory confirmation.",
+                        "reasoning": f"{prefix} Assertion involves unconfirmed speculation or future predictions lacking regulatory confirmation.",
                         "suggested_correction": None,
                         "supporting_evidence_ids": [],
                         "contradicting_evidence_ids": [],
@@ -248,10 +261,10 @@ class ClaimVerificationEngine:
             if re.search(r"\b(terminate[ds]?|terminat\w*|abandon\w*|block\w*|call\w* off|cancel\w*|halt\w*|struck down) (their |the )?(planned merger|acquisition|merger|deal)\b", combined_evidence):
                 return {
                     "verdict": "CONTRADICTED",
-                    "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                    "provenance": provenance,
                     "freshness_score": avg_freshness,
                     "evidence_quality_score": avg_quality,
-                    "reasoning": f"{offline_prefix} Authoritative primary reports indicate the asserted transaction/merger was terminated, cancelled, or abandoned.",
+                    "reasoning": f"{prefix} Authoritative primary reports indicate the asserted transaction/merger was terminated, cancelled, or abandoned.",
                     "suggested_correction": "Refer to official regulatory disclosures regarding the terminated transaction.",
                     "supporting_evidence_ids": [],
                     "contradicting_evidence_ids": [ev_id],
@@ -268,10 +281,10 @@ class ClaimVerificationEngine:
                 if abs(c_year - e_year) >= 2:
                     return {
                         "verdict": "CONTRADICTED",
-                        "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                        "provenance": provenance,
                         "freshness_score": avg_freshness,
                         "evidence_quality_score": avg_quality,
-                        "reasoning": f"{offline_prefix} Temporal discrepancy: Claim asserts year {c_year}, but authoritative records document year {e_year}.",
+                        "reasoning": f"{prefix} Temporal discrepancy: Claim asserts year {c_year}, but authoritative records document year {e_year}.",
                         "suggested_correction": f"The documented year of occurrence is {e_year}.",
                         "supporting_evidence_ids": [],
                         "contradicting_evidence_ids": [ev_id],
@@ -295,10 +308,10 @@ class ClaimVerificationEngine:
             if re.search(claim_pat, claim_lower) and re.search(ev_pat, combined_evidence):
                 return {
                     "verdict": "CONTRADICTED",
-                    "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                    "provenance": provenance,
                     "freshness_score": avg_freshness,
                     "evidence_quality_score": avg_quality,
-                    "reasoning": f"{offline_prefix} Authoritative primary documentation directly contradicts the factual predicate in the claim.",
+                    "reasoning": f"{prefix} Authoritative primary documentation directly contradicts the factual predicate in the claim.",
                     "suggested_correction": "Refer to official primary documentation and statutory records.",
                     "supporting_evidence_ids": [],
                     "contradicting_evidence_ids": [ev_id],
@@ -311,10 +324,10 @@ class ClaimVerificationEngine:
             if re.search(r"\b(stepped down|resigned|succeeded by|former (ceo|president)|passed away|replaced by|left the role|was terminated|ousted|departed)\b", combined_evidence):
                 return {
                     "verdict": "OUTDATED",
-                    "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                    "provenance": provenance,
                     "freshness_score": avg_freshness,
                     "evidence_quality_score": avg_quality,
-                    "reasoning": f"{offline_prefix} Authoritative corporate records indicate the specified leader has stepped down, been succeeded, or departed the role.",
+                    "reasoning": f"{prefix} Authoritative corporate records indicate the specified leader has stepped down, been succeeded, or departed the role.",
                     "suggested_correction": "Update to the current appointed executive or leadership.",
                     "supporting_evidence_ids": [],
                     "contradicting_evidence_ids": [ev_id],
@@ -326,10 +339,10 @@ class ClaimVerificationEngine:
             if re.search(r"\b(officially left|withdrew from|invalidate[ds]?|struck down|no longer in force|obsolete|superseded)\b", combined_evidence):
                 return {
                     "verdict": "OUTDATED",
-                    "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                    "provenance": provenance,
                     "freshness_score": avg_freshness,
                     "evidence_quality_score": avg_quality,
-                    "reasoning": f"{offline_prefix} Authoritative governmental and legal records indicate this legal or treaty status has officially changed.",
+                    "reasoning": f"{prefix} Authoritative governmental and legal records indicate this legal or treaty status has officially changed.",
                     "suggested_correction": "Update to the current treaty, membership, or statutory regulatory framework.",
                     "supporting_evidence_ids": [],
                     "contradicting_evidence_ids": [ev_id],
@@ -345,10 +358,10 @@ class ClaimVerificationEngine:
             if eol_markers and not re.search(r"\b(deprecated dockershim|historical|was released)\b", claim_lower):
                 return {
                     "verdict": "OUTDATED",
-                    "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                    "provenance": provenance,
                     "freshness_score": avg_freshness,
                     "evidence_quality_score": avg_quality,
-                    "reasoning": f"{offline_prefix} Authoritative documentation indicates this software, framework, or standard has reached End-of-Life (EOL) or been superseded.",
+                    "reasoning": f"{prefix} Authoritative documentation indicates this software, framework, or standard has reached End-of-Life (EOL) or been superseded.",
                     "suggested_correction": "Migrate to the current actively supported release line.",
                     "supporting_evidence_ids": [],
                     "contradicting_evidence_ids": [ev_id],
@@ -369,10 +382,10 @@ class ClaimVerificationEngine:
         if len(claim_substantive) >= 3 and overlap_count < 2:
             return {
                 "verdict": "UNVERIFIED",
-                "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+                "provenance": provenance,
                 "freshness_score": None,
                 "evidence_quality_score": 35.0,
-                "reasoning": f"{offline_prefix} Retrieved evidence lacks sufficient substantive overlap with the asserted claim terms.",
+                "reasoning": f"{prefix} Retrieved evidence lacks sufficient substantive overlap with the asserted claim terms.",
                 "suggested_correction": None,
                 "supporting_evidence_ids": [],
                 "contradicting_evidence_ids": [],
@@ -382,10 +395,10 @@ class ClaimVerificationEngine:
         # 5. Corroborated Current Facts
         return {
             "verdict": "CURRENT",
-            "provenance": "OFFLINE_HEURISTIC_ANALYSIS",
+            "provenance": provenance,
             "freshness_score": avg_freshness,
             "evidence_quality_score": avg_quality,
-            "reasoning": f"{offline_prefix} Corroborated by available documentation and technical reference sources without detected contradiction.",
+            "reasoning": f"{prefix} Corroborated by available documentation and technical reference sources without detected contradiction.",
             "suggested_correction": None,
             "supporting_evidence_ids": [ev_id],
             "contradicting_evidence_ids": [],

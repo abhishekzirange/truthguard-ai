@@ -139,11 +139,14 @@ class VerificationService:
                         "source_type": ev_model.source_type,
                     })
 
+                is_search_live = bool(search_res.get("live_success", False))
+
                 # Verify Claim
                 assessment_result = await self.verification_engine.verify_claim(
                     claim=claim_data,
                     evidence_list=evidence_dict_list,
-                    freshness_policy=request.freshness_policy
+                    freshness_policy=request.freshness_policy,
+                    is_live_search=is_search_live
                 )
 
                 assessment_prov = assessment_result.get("provenance", "OFFLINE_LOCAL")
@@ -151,14 +154,13 @@ class VerificationService:
                     bifrost_live_success_count += 1
 
                 # Accurate Provenance determination
-                is_search_live = search_res.get("live_success", False)
                 if is_search_live and assessment_prov == "LIVE_BIFROST":
                     claim_provenance = "LIVE_TAVILY_BIFROST"
                 elif is_search_live:
                     if self.bifrost_adapter.api_key:
                         claim_provenance = "OFFLINE_DETERMINISTIC" if assessment_prov == "OFFLINE_DETERMINISTIC" else "PARTIAL_TAVILY_ONLY"
                     else:
-                        claim_provenance = "LIVE_TAVILY_DETERMINISTIC" if assessment_prov == "OFFLINE_DETERMINISTIC" else "LIVE_TAVILY"
+                        claim_provenance = assessment_prov if "LIVE" in assessment_prov else "LIVE_TAVILY"
                 elif not is_search_live and assessment_prov == "LIVE_BIFROST":
                     claim_provenance = "PARTIAL_BIFROST_ONLY"
                 else:

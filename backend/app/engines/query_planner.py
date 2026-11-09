@@ -15,10 +15,19 @@ class QueryPlanner:
 
         # Refine query based on category
         if category in ["software_version", "api_version"]:
-            if subject and version:
-                query = f"{subject} latest stable release version {version} official"
+            from app.engines.deterministic_engine import DeterministicEngine, VersionIntent
+            intent = DeterministicEngine.detect_version_intent(claim_text)
+            clean_subject = re.sub(r"\b\d+(\.\d+)+\b", "", subject).strip() if subject else ""
+            clean_subject = clean_subject or subject or "software"
+
+            if intent == VersionIntent.LATEST_ASSERTION:
+                query = f"{clean_subject} latest stable release version official documentation"
+            elif intent == VersionIntent.HISTORICAL_MILESTONE:
+                query = f"{clean_subject} {version or ''} {claim_text[:50]} official release notes"
+            elif subject and version:
+                query = f"{clean_subject} latest release version {version} official"
             elif subject:
-                query = f"{subject} latest release version documentation"
+                query = f"{clean_subject} latest release version documentation"
             else:
                 query = f"{claim_text} official release notes"
             

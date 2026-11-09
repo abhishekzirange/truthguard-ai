@@ -102,12 +102,38 @@ class DeterministicEngine:
 
             matches = _VERSION_EXTRACTION_REGEX.finditer(text)
             for match in matches:
+                full_match = match.group(0).lower()
                 candidate_str = match.group(1).lstrip("v").strip()
+                after_match = text[match.end():match.end()+15].strip().lower()
+
+                # Exclude file sizes, memory capacities, and unit measurements (e.g., 42.8 MB, 16 GB)
+                if re.match(r"^(mb|gb|kb|tb|bytes|px|%|ms|fps|rpm|mhz|ghz)\b", after_match):
+                    continue
+
+                # Exclude calendar dates formatted with dots (e.g., 05.09.2022, 2024.12.01)
+                if re.match(r"^\d{1,2}\.\d{1,2}\.\d{4}$", candidate_str) or re.match(r"^\d{4}\.\d{1,2}\.\d{1,2}$", candidate_str):
+                    continue
+
                 try:
                     candidate = pkg_version.parse(candidate_str)
                     if candidate.base_version and not candidate.is_prerelease:
                         # Filter out calendar years (e.g., 2024, 2023) unless genuine CalVer (like 24.04)
                         if 1900 <= candidate.major <= 2100 and getattr(candidate, "minor", 0) == 0:
+                            continue
+                        # Filter out dates where year landed in micro (e.g. 5.9.2022)
+                        if getattr(candidate, "micro", 0) and 1900 <= candidate.micro <= 2100:
+                            continue
+                        # If candidate has no dot, require it to be explicitly marked as version/v and <= 100
+                        if "." not in candidate_str:
+                            if not (full_match.startswith("v") or "version" in full_match):
+                                continue
+                            if candidate.major > 100:
+                                continue
+                        # If claimed version has dots (e.g. 3.11), candidate without dots is not a matching SemVer release line
+                        if "." in clean_claimed and "." not in candidate_str:
+                            continue
+                        # Prevent unnatural major version leaps (e.g. comparing 3.11 with 42.x or 100.x) unless CalVer (>= 2000)
+                        if v_claim.major < 100 and candidate.major > v_claim.major + 5 and candidate.major < 1900:
                             continue
                         if highest_found is None or candidate > highest_found:
                             highest_found = candidate
