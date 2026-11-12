@@ -104,10 +104,15 @@ class DeterministicEngine:
             for match in matches:
                 full_match = match.group(0).lower()
                 candidate_str = match.group(1).lstrip("v").strip()
+                before_match = text[max(0, match.start()-15):match.start()].strip().lower()
                 after_match = text[match.end():match.end()+15].strip().lower()
 
-                # Exclude file sizes, memory capacities, and unit measurements (e.g., 42.8 MB, 16 GB)
-                if re.match(r"^(mb|gb|kb|tb|bytes|px|%|ms|fps|rpm|mhz|ghz)\b", after_match):
+                # Exclude file sizes, memory capacities, time/count units, and currency (e.g., 42.8 MB, 18 months, 30 days)
+                if re.match(r"^(mb|gb|kb|tb|bytes|px|%|ms|fps|rpm|mhz|ghz|k|m|b|days?|hours?|weeks?|months?|years?|minutes?|seconds?|tokens?|users?|dollars?|usd|cents?)\b", after_match):
+                    continue
+
+                # Exclude standard identifiers (PEP, RFC, HTTP, port, CVE, issue numbers)
+                if re.search(r"\b(pep|rfc|iso|http|https|port|cve|issue|pr|bug|step|section|chapter|#)$", before_match):
                     continue
 
                 # Exclude calendar dates formatted with dots (e.g., 05.09.2022, 2024.12.01)
@@ -123,18 +128,13 @@ class DeterministicEngine:
                         # Filter out dates where year landed in micro (e.g. 5.9.2022)
                         if getattr(candidate, "micro", 0) and 1900 <= candidate.micro <= 2100:
                             continue
-                        # If candidate has no dot, require it to be explicitly marked as version/v and <= 100
+                        # Handle dotless integers (e.g., Node.js 22, PostgreSQL 17 vs stray numbers)
                         if "." not in candidate_str:
-                            if not (full_match.startswith("v") or "version" in full_match):
-                                continue
                             if candidate.major > 100:
                                 continue
-                        # If claimed version has dots (e.g. 3.11), candidate without dots is not a matching SemVer release line
-                        if "." in clean_claimed and "." not in candidate_str:
-                            continue
-                        # Prevent unnatural major version leaps (e.g. comparing 3.11 with 42.x or 100.x) unless CalVer (>= 2000)
-                        if v_claim.major < 100 and candidate.major > v_claim.major + 5 and candidate.major < 1900:
-                            continue
+                            # If claimed version has minor/patch dots (e.g. 3.11), reject unmarked dotless integers
+                            if "." in clean_claimed and not (full_match.startswith("v") or "version" in full_match):
+                                continue
                         if highest_found is None or candidate > highest_found:
                             highest_found = candidate
                             highest_found_str = candidate_str

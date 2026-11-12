@@ -97,11 +97,11 @@ export const AnalyticsPage: React.FC = () => {
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">Total Gateway Tokens</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">Optional LLM Tokens</span>
           <span className="text-3xl font-extrabold font-mono text-blue-400">
             {((metrics?.total_input_tokens || 0) + (metrics?.total_output_tokens || 0)).toLocaleString()}
           </span>
-          <span className="text-[11px] text-slate-500 block mt-2">Bifrost LLM gateway traffic</span>
+          <span className="text-[11px] text-slate-500 block mt-2">Zero external LLM dependency in Tavily mode</span>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-5">

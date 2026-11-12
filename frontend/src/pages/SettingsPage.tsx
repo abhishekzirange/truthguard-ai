@@ -68,7 +68,7 @@ export const SettingsPage: React.FC = () => {
       <div className="mb-8 rounded-xl bg-slate-900/60 border border-slate-800 p-4 flex items-center gap-3 text-xs text-slate-400">
         <Lock className="h-4 w-4 text-teal-400 shrink-0" />
         <span>
-          <strong>Enterprise Credential Isolation:</strong> API keys for Tavily and Bifrost Gateway are securely managed by the FastAPI server environment. Keys are never transmitted to client browsers.
+          <strong>Enterprise Credential Isolation:</strong> The Tavily Search API key is securely managed by the FastAPI server environment. Credentials are never transmitted to client browsers.
         </span>
       </div>
 
@@ -94,7 +94,7 @@ export const SettingsPage: React.FC = () => {
             <div className="flex justify-between border-b border-slate-800/60 pb-2">
               <span className="text-slate-400">Configured:</span>
               <span className="font-semibold text-slate-200 font-mono">
-                {report?.tavily.configured ? 'Configured' : 'Using Demo Knowledge Base'}
+                {report?.tavily.configured ? 'Configured' : 'Using Offline Fallback'}
               </span>
             </div>
             <div className="flex justify-between border-b border-slate-800/60 pb-2">
@@ -116,39 +116,35 @@ export const SettingsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Bifrost AI Gateway Status */}
+        {/* Deterministic Verification Engine Status */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               <div className="h-8 w-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                 <Cpu className="h-4 w-4" />
               </div>
-              <h2 className="text-sm font-bold text-white">Bifrost Gateway</h2>
+              <h2 className="text-sm font-bold text-white">Evaluation Engine</h2>
             </div>
-            {report?.bifrost.configured ? (
-              <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
-            ) : (
-              <span className="flex h-2.5 w-2.5 rounded-full bg-amber-400" />
-            )}
+            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
           </div>
 
           <div className="space-y-2 text-xs flex-1">
             <div className="flex justify-between border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400">Gateway Model:</span>
+              <span className="text-slate-400">Evaluation Mode:</span>
               <span className="font-mono text-indigo-300 font-semibold">
-                {report?.bifrost.details?.model || 'gpt-4o-mini'}
+                Deterministic SemVer + Consensus
               </span>
             </div>
             <div className="flex justify-between border-b border-slate-800/60 pb-2">
-              <span className="text-slate-400">Inference Status:</span>
-              <span className={`font-semibold ${report?.bifrost.reachable ? 'text-emerald-400' : 'text-slate-400'}`}>
-                {report?.bifrost.reachable ? 'Active' : 'Deterministic Hybrid Active'}
+              <span className="text-slate-400">Engine Status:</span>
+              <span className="font-semibold text-emerald-400">
+                Active (Zero LLM Dependency)
               </span>
             </div>
           </div>
 
           <p className="mt-4 text-[11px] text-slate-400 bg-slate-950 p-2.5 rounded border border-slate-800/80">
-            {report?.bifrost.message || 'Checking status...'}
+            PEP 440 version comparison, intent classification, and freshness half-life scoring ready.
           </p>
         </div>
 

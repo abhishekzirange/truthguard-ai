@@ -63,7 +63,7 @@ const STAGES = [
   'Decomposing into atomic claims (Subject-Predicate-Object)...',
   'Planning targeted disambiguated search queries...',
   'Retrieving live authoritative evidence via Tavily...',
-  'Running deterministic SemVer & Bifrost AI Gateway evaluation...',
+  'Running deterministic SemVer & semantic consensus evaluation...',
   'Calculating exponential freshness decay & evidence quality...',
   'Compiling verification report & citations...',
 ];
@@ -125,12 +125,7 @@ export const WorkspacePage: React.FC = () => {
   };
 
   const isTavilyLive = Boolean(integrations?.tavily?.configured && integrations?.tavily?.reachable);
-  const isBifrostConfigured = Boolean(integrations?.bifrost?.configured);
-  const isBifrostLive = Boolean(integrations?.bifrost?.configured && integrations?.bifrost?.reachable);
-
-  const activeMode = isTavilyLive
-    ? (isBifrostConfigured && !isBifrostLive ? 'PARTIAL' : 'LIVE')
-    : (isBifrostLive ? 'PARTIAL' : 'OFFLINE');
+  const activeMode = isTavilyLive ? 'LIVE' : 'OFFLINE';
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
@@ -139,7 +134,7 @@ export const WorkspacePage: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-400 mb-2">
             <ShieldCheck className="h-3.5 w-3.5 text-teal-400" />
-            <span>Verification Workspace</span>
+            <span>Verification Workspace • Stale-Answer Detector (Tavily Track)</span>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
             Audit an AI-Generated Answer
@@ -157,8 +152,6 @@ export const WorkspacePage: React.FC = () => {
               className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
                 activeMode === 'LIVE'
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                  : activeMode === 'PARTIAL'
-                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                   : 'bg-slate-800 text-slate-300 border border-slate-700'
               }`}
             >
@@ -179,11 +172,11 @@ export const WorkspacePage: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <span className="text-slate-400 flex items-center gap-1.5">
-                {isBifrostLive ? <Wifi className="h-3 w-3 text-emerald-400" /> : <WifiOff className="h-3 w-3 text-slate-500" />}
-                Bifrost AI Gateway:
+                <ShieldCheck className="h-3 w-3 text-teal-400" />
+                Verification Engine:
               </span>
-              <span className={isBifrostLive ? 'text-emerald-400 font-mono text-[11px]' : 'text-slate-500 font-mono text-[11px]'}>
-                {isBifrostLive ? 'ONLINE' : 'OFFLINE'}
+              <span className="text-teal-400 font-mono text-[11px]">
+                DETERMINISTIC
               </span>
             </div>
           </div>

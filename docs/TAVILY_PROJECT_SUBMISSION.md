@@ -5,200 +5,137 @@
 **Technology Sponsor Track:** **Tavily Search API**  
 **Product Name:** TruthGuard AI  
 **Tagline:** Don't Trust. Verify.  
-**Repository:** `https://github.com/abhishekzirange/truthguard-ai`  
+**Repository:** [https://github.com/abhishekzirange/truthguard-ai](https://github.com/abhishekzirange/truthguard-ai)  
+**Supporting Audit Docs:**
+- [Offline 100-Claim Benchmark Report](https://github.com/abhishekzirange/truthguard-ai/blob/main/docs/BENCHMARK_RESULTS.md)
+- [Independent Holdout Benchmark Report](https://github.com/abhishekzirange/truthguard-ai/blob/main/docs/HOLDOUT_BENCHMARK_RESULTS.md)
+- [Final Technical Readiness Report](https://github.com/abhishekzirange/truthguard-ai/blob/main/docs/FINAL_HACKATHON_READINESS_REPORT.md)
 
 ---
 
 ## 1. Project Overview & Elevator Pitch
 
-Large Language Models (ChatGPT, Claude, Gemini) generate answers containing outdated, superseded, or contradicted information with 100% confidence. When APIs evolve, pricing tiers shift, laws are enacted, or corporate leadership changes, static model weights produce costly enterprise hallucinations.
+Large Language Models (ChatGPT, Claude, Gemini) generate answers containing outdated, superseded, or contradicted information with high confidence. When APIs evolve, pricing tiers shift, regulations change, or corporate leadership transitions, static model weights produce costly enterprise hallucinations.
 
-**TruthGuard AI** is an autonomous verification and information freshness intelligence platform engineered specifically for the **Tavily Stale-Answer Detection** hackathon theme. TruthGuard AI extracts atomic factual claims from AI answers, plans disambiguated queries, executes real-time authoritative web retrieval via the **Tavily Search API**, and scores temporal freshness using mathematical exponential decay ($100 \times 2^{-\Delta t / t_{\text{half}}}$).
+**TruthGuard AI** is a verification and information freshness intelligence platform built for the **Tavily Stale-Answer Detection** hackathon theme. **Tavily Search API retrieves current primary web evidence**, and **TruthGuard AI's deterministic and semantic consensus engines independently evaluate** whether extracted claims are `CURRENT`, `OUTDATED`, `CONTRADICTED`, or `UNVERIFIED`, scoring temporal freshness with exponential half-life decay ($100 \times 2^{-\Delta t / t_{\text{half}}}$).
 
 ---
 
 ## 2. Problem Statement & Why Tavily is Essential
 
 ### The Core Problem: LLM Temporal Blindness
-1. **Knowledge Cutoffs & Temporal Drift:** AI models cannot detect that a version was deprecated or that a CEO resigned after their training cutoff.
-2. **Confident Stale Claims:** LLMs state *"Python 3.11 is the latest stable release"* or *"Twitter is led by CEO Jack Dorsey"* with absolute certainty.
-3. **Enterprise Risk:** Unverified stale answers lead to broken software builds, flawed cloud cost forecasts, and regulatory compliance breaches.
+1. **Knowledge Cutoffs & Temporal Drift:** Static model weights cannot detect that a software release was superseded or that an executive resigned after training cutoff.
+2. **Confident Stale Claims:** LLMs state *"Python 3.11 is the latest stable release"* or *"Twitter is led by CEO Jack Dorsey"* with no uncertainty signal.
+3. **Enterprise Risk:** Unverified stale answers cause broken software dependencies, inaccurate cost estimates, and regulatory compliance errors.
 
-### Why Tavily Search API is the Critical Enabler
-Traditional web scraping or generic search engines return noisy, unstructured HTML bloated with cookie banners, ads, and irrelevant navigational chrome. **Tavily Search API** provides the exact capabilities required for automated fact-checking:
-- **Noise-Free Factual Content:** High-density, cleaned text snippets optimized for automated verification without scraping bloat.
-- **Search Query Disambiguation:** Precision retrieval using targeted queries planned for Subject-Predicate-Object triples.
-- **Source Domain Authority:** Reliable identification of canonical primary sources (e.g. `docs.python.org`, `kubernetes.io`, `sec.gov`, `curia.europa.eu`).
-- **Publication Timestamp Normalization:** Real, unmanipulated publication timestamps that anchor our mathematical freshness decay engine.
+### Why Tavily Search API is Essential
+Raw HTML scraping or generic keyword search returns noisy pages cluttered with ads, navigation chrome, and boilerplate. **Tavily Search API** provides the clean factual foundation that TruthGuard's evaluation engine needs:
+- **Noise-Free Factual Snippets:** Clean extracted text passages focused on factual content.
+- **Targeted Query Execution:** Precision retrieval from disambiguated Subject-Predicate-Object verification queries.
+- **Canonical Primary Sources:** High-signal results from official documentation portals (`docs.python.org`, `python.org`, `kubernetes.io`, `curia.europa.eu`).
+- **Publication Timestamp Normalization:** Temporal anchors (preserved without fabrication) for mathematical decay scoring.
 
 ---
 
 ## 3. System Architecture & Pipeline
 
+> **Separation of Responsibilities:** Tavily retrieves authoritative evidence from the live web; TruthGuard's deterministic SemVer parser (PEP 440), price extractor, and semantic consensus rules interpret that evidence to produce a verifiable verdict.
+
 ```mermaid
 flowchart TD
-    UserAnswer[Input AI Answer] --> ClaimExtractor[1. Atomic Claim Extraction & SPO Decomposition]
-    ClaimExtractor --> QueryPlanner[2. Disambiguated Query Planner & Domain Policy]
-    QueryPlanner --> TavilyAPI[3. Tavily Live Search API POST /search]
-    TavilyAPI --> CleanSnippets[Clean Authoritative Snippets + Publication Dates]
-    CleanSnippets --> DeterministicEngine[4. SemVer Intent & Deterministic Verification]
-    CleanSnippets --> SemanticConsensus[5. Heuristic Semantic Consensus]
-    DeterministicEngine --> FreshnessScorer[6. Mathematical Freshness & Quality Decay Engine]
+    UserAnswer["Input AI Answer"] --> ClaimExtractor["1. Atomic Claim Extraction & SPO Decomposition"]
+    ClaimExtractor --> QueryPlanner["2. Disambiguated Query Planner & Domain Policy"]
+    QueryPlanner --> TavilyAPI["3. Tavily Live Search API (POST /search)"]
+    TavilyAPI --> CleanSnippets["Retrieved Web Evidence + Publication Dates"]
+    CleanSnippets --> DeterministicEngine["4. TruthGuard SemVer Intent & Deterministic Engine"]
+    CleanSnippets --> SemanticConsensus["5. TruthGuard Heuristic Semantic Consensus"]
+    DeterministicEngine --> FreshnessScorer["6. Mathematical Freshness & Evidence Quality Engine"]
     SemanticConsensus --> FreshnessScorer
-    FreshnessScorer --> AuditReport[7. Transparent Audit Dashboard & Citation Matrix]
+    FreshnessScorer --> AuditReport["7. Transparent Audit Dashboard & Citation Matrix"]
 ```
 
-### Detailed Pipeline Flow
-```
-┌──────────────────────────────────────────────────────────┐
-│                   Input AI-Generated Answer              │
-│       "Python 3.11 is the latest stable release..."      │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────┐
-│ 1. Atomic SPO Decomposition                              │
-│    Subject: Python 3.11 | Predicate: is latest | Obj: ...│
-└────────────────────────────┬─────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────┐
-│ 2. Disambiguated Query Planner                           │
-│    Query: "Python latest stable release version official"│
-│    Domains: ["python.org", "docs.python.org", "pypi.org"]│
-└────────────────────────────┬─────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────┐
-│ 3. Tavily Live Search API (POST /search)                 │
-│    • Real-time web retrieval • Domain authority filtering│
-│    • Source reliability scoring • Publication dates      │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────┐
-│ 4. Deterministic SemVer & Semantic Consensus Engine      │
-│    • PEP 440 version comparison • Oppositional lemmas    │
-│    • Historical milestone preservation (No false alerts) │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────┐
-│ 5. Mathematical Freshness & Evidence Quality Scoring     │
-│    • Exponential half-life decay: S_f(t) = 100 * 2^(-t/h)│
-│    • Domain authority & corroboration weighting          │
-└────────────────────────────┬─────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────┐
-│ 6. Transparent Audit & Evidence Matrix UI                │
-│    • Verdict: OUTDATED • Provenance: LIVE_TAVILY         │
-│    • Correction: "Python 3.15.2 is the current release." │
-│    • Primary Tavily Citations with noopener links        │
-└──────────────────────────────────────────────────────────┘
-```
+### Step-by-Step Pipeline Architecture
+1. **Atomic SPO Decomposition:** Breaks multi-sentence AI answers into discrete atomic factual claims (`subject`, `predicate`, `object`, `category`, `mentioned_version`).
+2. **Disambiguated Query Planning:** Generates focused search queries (for latest-release assertions, strips stale version numbers from the search query so current releases surface cleanly).
+3. **Tavily Live Retrieval (`POST /search`):** Queries live web sources, attaches domain authority scores ($S$), and parses available publication dates without inventing timestamps.
+4. **Deterministic Evaluation Engine:**
+   - **SemVer + Intent Classification (PEP 440):** Distinguishes `LATEST_ASSERTION` (*"Python 3.11 is the latest"* $\rightarrow$ compared against retrieved releases) from `HISTORICAL_MILESTONE` (*"Kubernetes 1.20 deprecated dockershim"* $\rightarrow$ checked for historical corroboration). Dynamically extracts versions directly from retrieved evidence without hardcoded facts.
+   - **Price & Semantic Consensus Rules:** Checks currency/numeric claims, leadership succession cues, merger cancellations, and legal framework invalidation markers.
+5. **Freshness & Quality Scoring:** Calculates category-specific exponential half-life decay and evidence quality weights.
+6. **Honest Execution Provenance:** Displays `LIVE` (`LIVE_TAVILY` / `LIVE_TAVILY_DETERMINISTIC`) **only** when live Tavily retrieval succeeds. If Tavily fails or is unconfigured, degrades explicitly to `OFFLINE` (`OFFLINE_DETERMINISTIC` / `OFFLINE_HEURISTIC_ANALYSIS`).
 
 ---
 
-## 4. Key Innovations & Mathematical Models
+## 4. Mathematical Freshness & Quality Models
 
 ### A. Domain Half-Life Exponential Decay
-TruthGuard models information freshness using radioactive exponential decay based on domain category half-lives:
-
 $$\text{Freshness} = 100 \times 2^{-\frac{\Delta t}{t_{\text{half}}}}$$
 
 | Category | Half-Life ($t_{\text{half}}$) | Rationale |
 | :--- | :--- | :--- |
-| **Product Pricing** | 7 days | Cloud pricing and SaaS tiers fluctuate weekly. |
-| **Software Versions** | 30 days | Fast dependency cycles and security patch releases. |
-| **API Documentation** | 30 days | Deprecations, endpoint changes, and SDK updates. |
-| **Regulations & Policy** | 90 days | Quarterly statutory deadlines and regulatory filings. |
-| **Company Information** | 90 days | Executive appointments, earnings, and M&A deals. |
-| **General Technical Facts**| 365 days | Stable architectural paradigms and specs. |
+| **Product Pricing** | 7 days | Cloud API pricing and SaaS tiers fluctuate frequently. |
+| **Software Versions** | 30 days | Rapid release cadences and security patches. |
+| **API Documentation** | 30 days | Endpoint deprecations and SDK updates. |
+| **Regulations & Policy** | 90 days | Statutory deadlines and regulatory rulings. |
+| **Company Information** | 90 days | Executive transitions, earnings, and M&A deals. |
+| **General Technical Facts** | 365 days | Stable protocols and architectural concepts. |
 
 ### B. Epistemic Evidence Quality Scoring
 $$\text{Evidence Quality} = 100 \times \left( 0.45 \cdot S + 0.35 \cdot R + 0.20 \cdot \frac{F}{100} \right)$$
-- $S \in [0.0, 1.0]$: Source Domain Reliability (Official docs/registries = 1.0, Tech news = 0.85, Blogs = 0.45).
-- $R \in [0.0, 1.0]$: Relevance Score from Tavily.
-- $F \in [0, 100]$: Calculated Freshness Score.
-
-### C. Semantic Version Intent Detection
-TruthGuard differentiates between:
-- **Latest/Current Assertions:** *"Python 3.11 is the latest stable release"* $\rightarrow$ Evaluated against highest official release returned by Tavily $\rightarrow$ **OUTDATED**.
-- **Historical Milestones:** *"Kubernetes 1.20 deprecated dockershim"* $\rightarrow$ Evaluated for historical accuracy $\rightarrow$ **CURRENT** (prevents false-positive outdated flagging).
-- **Compatibility Statements:** *"FastAPI supports Python 3.10 and 3.11"* $\rightarrow$ Evaluated for compatibility range $\rightarrow$ **CURRENT**.
+- $S \in [0.0, 1.0]$: Source Domain Reliability (Official docs/registries = 1.0, reputable news = 0.85, blogs = 0.45–0.50).
+- $R \in [0.0, 1.0]$: Search Relevance Score returned by Tavily.
+- $F \in [0, 100]$: Freshness Score.
 
 ---
 
-## 5. Benchmark Performance & Evaluation
+## 5. Benchmark Performance & Honest Evaluation Disclosures
 
-### Honest Separation: Offline Baseline vs. Live Tavily Capabilities
+All offline benchmarks below were executed strictly on `2026-11-12` with external APIs disabled to isolate the local deterministic/heuristic engine. **Live Tavily pipeline accuracy across full 100-claim benchmarks is not yet measured**; live behavior has been demonstrated and verified on selected real-world test cases.
 
-| Evaluation Dimension | Original Offline Benchmark | Independent Holdout (Unseen) | Live Tavily Verification |
-| :--- | :--- | :--- | :--- |
-| **Dataset Size** | 100 curated claims | 100 independent claims | Real-time dynamic claims |
-| **Execution Mode** | OFFLINE (Fixture Corpus) | OFFLINE (No Corpus) | **LIVE (Tavily Search API)** |
-| **Accuracy** | **69.00%** | **33.00%** | **Dynamic Real-Time** |
-| **Outdated Recall** | **92.00%** (23 / 25) | **50.00%** (12 / 24) | **Near 100% on indexed web** |
-| **Outdated Precision**| **85.19%** (23 / 27) | **57.14%** (12 / 21) | **High (Authoritative URLs)**|
-| **F1 Score** | **0.885** | **0.533** | **Production Grade** |
-| **False Positive Rate**| **5.33%** (4 / 75) | **11.84%** (9 / 76) | **Eliminated via intent gating**|
-| **Latency per Claim** | 16.7 ms | 15.2 ms | 1.2s – 2.4s (Web network RT) |
+| Evaluation Tier | Mode | Overall Accuracy | Outdated Recall | Outdated Precision | Outdated F1 | False Positive Rate | Avg Latency |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Original 100-Claim Benchmark** | Offline Fixture Corpus | **69.00%** (69/100) | **88.00%** (22/25) | **88.00%** (22/25) | **0.880** | **4.00%** (3/75) | 18.3 ms |
+| **Independent Holdout (100 Claims)** | Offline Zero-Corpus | **33.00%** (33/100) | **50.00%** (8/16) | **57.14%** (8/14) | **0.533** | **7.14%** (6/84) | 18.1 ms |
+| **Live Tavily Pipeline** | Live Web Retrieval | **Not yet measured** | **Not yet measured** | **Not yet measured** | **Not yet measured** | **Not yet measured** | ~1.8s – 2.5s (demonstrated) |
 
-### Why the Metrics Differ & Offline Limitations
-- **Offline Mode Limitations:** In offline mode without live search, the engine relies strictly on pre-computed local fixtures and lexical rules. When evaluated on unseen claims (the holdout dataset), the engine safely returns `UNVERIFIED` rather than hallucinating answers, which naturally brings offline accuracy down to 33%.
-- **Live Tavily Advantage:** When Tavily API is online, the pipeline retrieves the latest official web pages in real-time. Stale claims that post-date the training cutoff of any LLM are immediately caught and corrected with live authoritative URLs.
+### Confusion Matrices (Offline Runs on 2026-11-12)
+
+- **Original 100-Claim Benchmark (`benchmark_100_claims.json`):** `TP = 22`, `FP = 3`, `FN = 3`, `TN = 72` (Total Outdated = `25`, Not Outdated = `75`).
+- **Independent Holdout Benchmark (`holdout_100_claims.json`):** `TP = 8`, `FP = 6`, `FN = 8`, `TN = 78` (Total Outdated = `16`, Not Outdated = `84`).
+
+### Metric Reconciliation & Offline Engine Limitations
+1. **Reconciling Holdout & Baseline Figures:**
+   - The earlier `2026-11-02` baseline (commit `d7af0a5`) recorded holdout precision of **53.33%** (`8/15`, `FP=7`) and original recall of **92.00%** (`23/25`, `FP=4`).
+   - Subsequent hardening of `DeterministicEngine` to exclude stray non-version numbers (such as `$10 million`, file sizes `42.8 MB`, `DD.MM.YYYY` dates, and `PEP`/`RFC` identifiers) removed 1 false positive in the holdout (`FP: 7 -> 6`, precision **57.14%** `8/14`) and removed 1 FP plus 1 accidental `$10`-matched TP (`claim-020`, Docker 1.13) in the original set (`TP: 23 -> 22`, `FP: 4 -> 3`, accuracy preserved at **69.00%**).
+   - An earlier draft of this document mistakenly showed `12/24` and `12/21` in the holdout summary; those erroneous denominators have been corrected to match the actual confusion matrix (`8/16` recall, `8/14` precision).
+2. **Offline Limitations Explained:**
+   - Without live Tavily web retrieval, the offline engine cannot verify unseen or newly emerging claims (pricing changes, new releases, recent executive moves). In blind holdout testing without external web search, unseen claims predominantly classify as `UNVERIFIED` (avoiding fabricated verdicts), which explains why offline holdout accuracy is 33.00%.
+   - Live Tavily integration resolves evidence retrieval gaps dynamically at query time, though full-dataset live evaluation metrics remain to be measured.
 
 ---
 
-## 6. Live Demonstration Guide for Hackathon Judges
+## 6. Live Tavily Demonstration Walkthrough (Verified 2026-11-12)
 
-### Step-by-Step Walkthrough
+### Verified Live Example — Python Release Check
+- **Timestamp (UTC):** `2026-11-12T08:09:35.574285+00:00`
+- **Input Claim:** `"Python 3.11 is the latest stable Python release."`
+- **Official Source Verification:** At test time (`2026-11-12`), official Python releases (`https://www.python.org/downloads/release/python-3152` and `https://www.python.org/downloads`) confirm **Python 3.15.2** (released **Oct. 25, 2026**, following the PEP 790 3.15 schedule starting Oct. 2026; 3.16 is pre-release).
+- **Pipeline Output:**
+  - **Execution Mode:** `LIVE` (Latency: `1881 ms`)
+  - **Planned Query:** `Python latest stable release version official documentation`
+  - **Tavily Retrieved Sources:**
+    - `What's New In Python 3.13` ([docs.python.org](https://docs.python.org/3/whatsnew/3.13.html))
+    - `What's new in Python 3.14 — Python 3.15.2 documentation` ([docs.python.org](https://docs.python.org/3/whatsnew/3.14.html))
+    - `Latest Python Version (2025) – What's New in Python 3.14?` ([liquidweb.com](https://www.liquidweb.com/blog/latest-python-version))
+    - `Python documentation by version | Python.org` ([python.org](https://www.python.org/doc/versions))
+  - **Verdict:** `OUTDATED` (`LIVE_TAVILY_DETERMINISTIC`)
+  - **Suggested Correction (Extracted Dynamically from Retrieved Evidence):** `"Python 3.15.2 is the current release."`
 
-1. **Access the Web Workspace:**
-   Open `http://localhost:5173/` in your browser.
-   - Observe the header badge: `Theme: Stale-Answer Detector (Tavily Track)`.
-   - Observe the live status pill: `Tavily Search: ONLINE` with live roundtrip latency.
-
-2. **Test Scenario 1 — Stale Software Version:**
-   - **Input:**
-     ```
-     Python 3.11 is the latest stable Python release.
-     ```
-   - **Click:** "Audit Answer"
-   - **Result:**
-     - Overall Freshness Score: Low (Outdated assertion).
-     - Execution Mode: `LIVE`
-     - Claim Verdict: `OUTDATED` (Provenance: `LIVE_TAVILY_DETERMINISTIC`).
-     - Reasoning: `Claimed version 3.11 is superseded by official release 3.15.2.`
-     - Suggested Correction: `Python 3.15.2 is the current release.`
-     - Supporting Citations: Clickable link to `https://docs.python.org/3/whatsnew/` with reliability score 1.0.
-
-3. **Test Scenario 2 — Historical Deprecation Preservation (Zero False Positive):**
-   - **Input:**
-     ```
-     Kubernetes 1.20 deprecated dockershim.
-     ```
-   - **Click:** "Audit Answer"
-   - **Result:**
-     - Claim Verdict: `CURRENT` (Provenance: `LIVE_TAVILY_DETERMINISTIC`).
-     - Reasoning: `Historical milestone for version 1.20 is corroborated by documentation.`
-     - Notice: TruthGuard does NOT falsely flag this as outdated because it detected historical intent rather than a latest-version assertion.
-
-4. **Test Scenario 3 — Stale Corporate Leadership:**
-   - **Input:**
-     ```
-     Twitter is currently run and led by CEO Jack Dorsey.
-     ```
-   - **Click:** "Audit Answer"
-   - **Result:**
-     - Claim Verdict: `OUTDATED` (Provenance: `LIVE_TAVILY`).
-     - Reasoning: Authoritative corporate records document departure and executive succession.
-     - Citations: Clickable links to live news and regulatory filings.
-
-5. **Test Scenario 4 — Superseded Regulatory Framework:**
-   - **Input:**
-     ```
-     The EU-US Privacy Shield is an active and valid legal framework for transatlantic data transfers.
-     ```
-   - **Click:** "Audit Answer"
-   - **Result:**
-     - Claim Verdict: `OUTDATED`.
-     - Reasoning: Invalidated by CJEU Schrems II ruling and superseded by the Data Privacy Framework.
+### Judge Demo Script (5-Minute Walkthrough)
+1. **Open Workspace:** Navigate to `http://localhost:5173/workspace`. Confirm the header badge reads `Stale-Answer Detector (Tavily Track)` and `Tavily Live Search: ONLINE`.
+2. **Test Outdated Software Version:** Paste `"Python 3.11 is the latest stable Python release."` and click **Audit Answer**. Point out the extracted claim, live `LIVE TAVILY VERIFICATION` banner, `docs.python.org` evidence cards, `OUTDATED` verdict, and dynamic `"Python 3.15.2 is the current release."` correction.
+3. **Test Historical Milestone Preservation:** Paste `"Kubernetes 1.20 deprecated dockershim."` and click **Audit Answer**. Point out that TruthGuard detects historical intent (`HISTORICAL_MILESTONE`) and marks it **`CURRENT`** rather than falsely flagging a historical fact as stale.
+4. **Inspect Evidence Matrix:** Click **Open Evidence Explorer** to view source domain authority, relevance ranking, freshness decay scores, and safe `noopener noreferrer` links.
 
 ---
 
@@ -207,17 +144,16 @@ TruthGuard differentiates between:
 ### Prerequisites
 - Python 3.12+
 - Node.js 18+ & npm
-- Tavily API Key (`tvly-...`)
+- Tavily API Key
 
-### 1. Clone & Configure
+### 1. Configure Environment
 ```bash
 git clone https://github.com/abhishekzirange/truthguard-ai.git
 cd truthguard-ai
 ```
-
-Create `.env` in the project root:
+Create `.env` in the repository root (already listed in `.gitignore`):
 ```env
-TAVILY_API_KEY=tvly-your-actual-api-key-here
+TAVILY_API_KEY=<your-tavily-api-key>
 DATABASE_URL=sqlite:///./truthguard.db
 ENVIRONMENT=development
 PORT=8000
@@ -227,58 +163,47 @@ PORT=8000
 ```bash
 cd backend
 python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
-
+.\venv\Scripts\activate   # Windows (use source venv/bin/activate on Linux/macOS)
 pip install -r requirements.txt
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
-API Documentation will be live at `http://localhost:8000/docs`.
 
-### 3. Start Frontend Dashboard
+### 3. Start Frontend UI
 ```bash
 cd ../frontend
 npm install
 npm run dev
 ```
-Dashboard will be live at `http://localhost:5173/`.
+Open `http://localhost:5173/`.
 
-### 4. Run Automated Test Suite
+### 4. Run Automated Tests
 ```bash
 cd ../backend
 python -m pytest tests/
 ```
-All 90 unit and integration tests will execute and pass in ~39 seconds.
 
 ---
 
-## 8. Explicit Disclosure of System Limitations
+## 8. Explicit System Limitations
 
-1. **Search Engine Dependency:** If a web source is behind a hard paywall or blocks automated indexing, TruthGuard relies on search snippet previews returned by Tavily.
-2. **Ambiguous Entity Queries:** When an AI answer references highly generic terms without context (e.g. *"Product X costs $10"*), query disambiguation produces wider search parameters that may require secondary refinement.
-3. **Offline Engine Boundary:** When external network connectivity is unavailable, TruthGuard enters offline fallback mode. Offline mode evaluates claims against local syntactic rules and returns `UNVERIFIED` for novel facts, guaranteeing zero fabricated claims.
+1. **Unmeasured Large-Scale Live Benchmark:** Live Tavily accuracy, recall, and precision have been validated on targeted demo examples, not yet across the full 100-claim corpora due to API quota and reproducibility variance.
+2. **Rule-Based Evidence Interpretation:** In Tavily-only mode (with no external LLM gateway), evidence evaluation relies on PEP 440 SemVer comparison, numeric pricing bounds, and lexical semantic rules; complex nuanced phrasing outside those rules may fall back to `UNVERIFIED`.
+3. **Source Accessibility & Timestamps:** Paywalled websites or pages without exposed publication metadata limit extraction to Tavily snippet previews, without fabricating missing dates.
+4. **Offline Mode Constraints:** When Tavily is unreachable or unconfigured, TruthGuard explicitly drops to `OFFLINE` mode and only detects patterns covered by local heuristics and fixture data.
 
 ---
 
-## 9. Official Hackathon Submission Field Answers
+## 9. Hackathon Submission Portal Field Answers
 
 - **Project Title:** TruthGuard AI
 - **Primary Theme / Category:** Build a Stale-Answer Detector for AI Applications (Tavily Track)
 - **Tagline:** Don't Trust. Verify.
-- **Short Description:** An autonomous information freshness intelligence platform that uses Tavily Search API to detect outdated, superseded, and contradicted claims in AI outputs with mathematical decay scoring.
+- **Short Description:** An information freshness verification platform that uses Tavily Search API to retrieve current primary web evidence and independently evaluates whether claims in AI answers are current, outdated, contradicted, or unverified.
 - **How was Tavily used?**  
-  Tavily Search API powers our real-time verification pipeline. When an AI answer is audited, TruthGuard breaks it down into atomic Subject-Predicate-Object triples, plans disambiguated queries, and queries Tavily's `/search` endpoint to fetch clean, authoritative web snippets and publication dates. These live snippets are evaluated by our SemVer and consensus engines to catch stale facts that post-date LLM training cutoffs.
+  Tavily Search API powers real-time evidence retrieval. TruthGuard decomposes AI answers into atomic Subject-Predicate-Object claims, plans disambiguated verification queries, and calls Tavily's `/search` endpoint to fetch clean authoritative web snippets and publication dates. TruthGuard's PEP 440 SemVer, pricing, and semantic consensus engines then interpret those live results to detect stale facts and propose grounded corrections.
 - **What makes this project unique?**  
-  1. We don't just search—we calculate mathematical freshness using radioactive exponential decay based on domain-specific half-lives (7d pricing, 30d software, 90d regulations).  
-  2. We differentiate between historical claims (*"Kubernetes 1.20 deprecated dockershim"*) and current assertions (*"Python 3.11 is the latest"*) to eliminate false positives.  
-  3. 100% transparent citations with `rel="noopener noreferrer"` links directly to Tavily source domains.
-- **Tech Stack:**  
-  - **Backend:** Python 3.12+, FastAPI, SQLAlchemy, Alembic, SQLite / PostgreSQL, HTTPX, Pydantic v2.  
-  - **Search & Retrieval:** Tavily Search API.  
-  - **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Recharts.  
-- **GitHub Repository:** `https://github.com/abhishekzirange/truthguard-ai`  
-- **Live Demo / Local Setup:**  
-  - Frontend: `http://localhost:5173/`  
-  - Backend API: `http://localhost:8000/docs`
+  1. Strict separation between evidence retrieval (Tavily) and deterministic evaluation (SemVer intent detection + semantic rules) with honest `LIVE` vs `OFFLINE` provenance badges.  
+  2. Semantic version intent classification that avoids false positives on historical statements (*"Kubernetes 1.20 deprecated dockershim"*).  
+  3. Domain-specific half-life freshness decay scoring (7d pricing, 30d software, 90d regulations) with `noopener noreferrer` primary source citations.
+- **Tech Stack:** Python, FastAPI, SQLAlchemy, Alembic, SQLite/PostgreSQL, HTTPX, Pydantic v2, Tavily Search API, React 19, TypeScript, Vite, Tailwind CSS.
+- **GitHub Repository:** [https://github.com/abhishekzirange/truthguard-ai](https://github.com/abhishekzirange/truthguard-ai)

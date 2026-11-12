@@ -133,7 +133,7 @@ export const ResultsPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider">
-                Execution Mode: {execMode} VERIFICATION
+                {execMode === 'LIVE' ? 'LIVE TAVILY VERIFICATION' : `Execution Mode: ${execMode} VERIFICATION`}
               </span>
               <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
                 execMode === 'LIVE'
@@ -147,7 +147,7 @@ export const ResultsPage: React.FC = () => {
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {execMode === 'LIVE'
-                ? 'Ground-truth verified via real-time Tavily search retrieval and authoritative web consensus.'
+                ? 'Ground-truth retrieved via real-time Tavily Search API and evaluated by TruthGuard deterministic SemVer & consensus engines.'
                 : execMode === 'PARTIAL'
                 ? 'Executed with partial external API connectivity. Missing components fell back safely to deterministic rules.'
                 : 'Executed in offline deterministic mode with PEP 440 SemVer parsing, pattern consensus, and verified corpus.'}
@@ -157,8 +157,8 @@ export const ResultsPage: React.FC = () => {
 
         {run.integration_status && (
           <div className="text-right text-[11px] font-mono text-slate-400 shrink-0 border-t sm:border-t-0 sm:border-l border-slate-800 pt-2 sm:pt-0 sm:pl-4">
-            <div>Tavily: <span className={run.integration_status?.tavily?.status === 'HEALTHY' ? 'text-emerald-400' : 'text-slate-500'}>{run.integration_status?.tavily?.status || 'N/A'}</span></div>
-            <div>Bifrost: <span className={run.integration_status?.bifrost?.status === 'HEALTHY' ? 'text-emerald-400' : 'text-slate-500'}>{run.integration_status?.bifrost?.status || 'N/A'}</span></div>
+            <div>Tavily Search: <span className={run.integration_status?.tavily?.status === 'HEALTHY' ? 'text-emerald-400' : 'text-amber-400'}>{run.integration_status?.tavily?.status || 'N/A'}</span></div>
+            <div>Evaluation Engine: <span className="text-teal-400">DETERMINISTIC</span></div>
           </div>
         )}
       </div>

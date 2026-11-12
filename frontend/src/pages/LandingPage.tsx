@@ -171,9 +171,9 @@ export const LandingPage: React.FC = () => {
 
             <div className="relative rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
               <div className="text-2xl font-bold text-slate-700 mb-3 font-mono">03</div>
-              <h3 className="text-base font-semibold text-white mb-2">Hybrid Verification</h3>
+              <h3 className="text-base font-semibold text-white mb-2">Deterministic Verification</h3>
               <p className="text-xs text-slate-400">
-                Deterministic Semantic Versioning and price bounds merged with Bifrost AI Gateway reasoning.
+                Deterministic PEP 440 Semantic Versioning, price bounds, and semantic consensus evaluation.
               </p>
             </div>
 

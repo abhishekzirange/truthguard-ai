@@ -1,7 +1,7 @@
 # TruthGuard AI — Independent Holdout Benchmark Report
 
 **Evaluation Type:** Unseen Independent Holdout Dataset (Zero Development Leakage)  
-**Date:** 2026-11-02 17:34:14 UTC  
+**Date:** 2026-11-12 08:10:36 UTC  
 **Human Review Status:** Fully Reviewed & Cited (RFCs, official releases, regulatory filings, corporate releases)  
 
 ## 1. Executive Summary
@@ -14,26 +14,26 @@ To validate that TruthGuard AI's verification engine generalizes to new facts wi
 | :--- | :--- | :--- |
 | **Overall Accuracy** | **33.00%** (33/100) | >= 65.0% |
 | **Outdated Recall** | **50.00%** (8/16) | >= 85.0% |
-| **Outdated Precision** | **53.33%** (8/15) | >= 80.0% |
-| **Outdated F1 Score** | **0.516** | >= 0.820 |
-| **False Positive Rate (FPR)** | **8.33%** (7/84) | <= 6.0% |
+| **Outdated Precision** | **57.14%** (8/14) | >= 80.0% |
+| **Outdated F1 Score** | **0.533** | >= 0.820 |
+| **False Positive Rate (FPR)** | **7.14%** (6/84) | <= 6.0% |
 | **Average Processing Latency** | **18.1 ms** | < 50.0 ms |
 
 ### Outdated Detection Confusion Matrix
 
 | | Actually OUTDATED | Actually NOT OUTDATED |
 | :--- | :--- | :--- |
-| **Predicted OUTDATED** | **TP = 8** | **FP = 7** |
-| **Predicted NOT OUTDATED** | **FN = 8** | **TN = 77** |
+| **Predicted OUTDATED** | **TP = 8** | **FP = 6** |
+| **Predicted NOT OUTDATED** | **FN = 8** | **TN = 78** |
 
 ## 2. Per-Class Performance
 
 | Class | Precision | Recall | F1 Score | TP | FP | FN | TN |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **CURRENT** | 72.4% | 34.4% | 0.467 | 21 | 8 | 40 | 31 |
-| **OUTDATED** | 53.3% | 50.0% | 0.516 | 8 | 7 | 8 | 77 |
+| **OUTDATED** | 57.1% | 50.0% | 0.533 | 8 | 6 | 8 | 78 |
 | **CONTRADICTED** | 0.0% | 0.0% | 0.000 | 0 | 1 | 18 | 81 |
-| **UNVERIFIED** | 7.3% | 80.0% | 0.133 | 4 | 51 | 1 | 44 |
+| **UNVERIFIED** | 7.1% | 80.0% | 0.131 | 4 | 52 | 1 | 43 |
 
 ## 3. Domain Performance Breakdown
 

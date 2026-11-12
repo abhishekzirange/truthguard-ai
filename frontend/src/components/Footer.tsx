@@ -11,7 +11,7 @@ export const Footer: React.FC = () => {
           <span>— Autonomous Stale-Answer Detection Platform</span>
         </div>
         <div className="flex items-center gap-6">
-          <span className="text-slate-400">Powered by Tavily & Bifrost AI Gateway</span>
+          <span className="text-slate-400">Powered by Tavily Search API</span>
           <span className="font-mono text-slate-600">v1.0.0</span>
         </div>
       </div>
