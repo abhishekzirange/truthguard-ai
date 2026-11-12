@@ -1,10 +1,12 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-from app.models import VerificationRun, Claim
+from app.models import VerificationRun
 
 
 class HistoryService:
+    """Provides query helpers for persisted verification runs."""
+
     @staticmethod
     def get_runs(db: Session, skip: int = 0, limit: int = 50) -> List[dict]:
         runs = (
@@ -23,6 +25,7 @@ class HistoryService:
                 "domain": r.domain,
                 "freshness_policy": r.freshness_policy,
                 "verification_status": r.verification_status,
+                "execution_mode": r.execution_mode or "OFFLINE",
                 "execution_time_ms": r.execution_time_ms,
                 "total_claims": summary.get("total_claims", len(r.claims)),
                 "outdated_count": summary.get("outdated_claims", 0),

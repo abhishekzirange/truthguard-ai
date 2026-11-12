@@ -1,32 +1,32 @@
-# React + TypeScript + Vite
+# TruthGuard AI — Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 + TypeScript + Vite single-page interface for **TruthGuard AI** (*Don't Trust. Verify.*).
 
-Currently, two official plugins are available:
+## Local Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Runs the Vite development server at `http://localhost:5173`. By default, API requests target `http://localhost:8000/api/v1` (configurable via `VITE_API_BASE_URL`).
+
+## Checks & Production Build
+
+```bash
+# Run linter
+npm run lint
+
+# Type-check & build production bundle
+npm run build
+```
+
+## Key Views
+
+- **`/` (`LandingPage`)**: Problem statement, verification workflow, and sample claim demonstration.
+- **`/workspace` (`WorkspacePage`)**: Answer submission form, domain and freshness policy selectors, and live Tavily connectivity badge.
+- **`/results/:id` (`ResultsPage`)**: Execution mode banner (`LIVE` vs `OFFLINE`), claim verdicts, reasoning, and evidence-backed corrections.
+- **`/evidence/:id` (`EvidenceExplorerPage`)**: Three-column comparison linking claims, retrieved Tavily sources, and mathematical quality scores.
+- **`/dashboard` & `/analytics`**: Run telemetry and category breakdown charts.
+- **`/history`**: Searchable audit trail of past verification runs.
+- **`/settings`**: Integration connectivity diagnostics and configured half-life decay policies.

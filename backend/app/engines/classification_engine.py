@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, Dict, Any
+from typing import Dict, Any
 
 # Category half-lives in days
 CATEGORY_HALF_LIVES = {

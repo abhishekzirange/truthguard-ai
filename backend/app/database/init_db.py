@@ -1,6 +1,6 @@
 import os
 import logging
-from sqlalchemy import inspect, create_engine
+from sqlalchemy import inspect
 from sqlalchemy.orm import sessionmaker
 from alembic.config import Config
 from alembic import command

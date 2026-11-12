@@ -2,19 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles,
-  Layers,
-  Clock,
   ShieldCheck,
-  Search,
-  CheckCircle2,
   AlertCircle,
-  HelpCircle,
-  RotateCcw,
   Code2,
   DollarSign,
-  FileText,
   Server,
-  Radio,
   Wifi,
   WifiOff,
   Info

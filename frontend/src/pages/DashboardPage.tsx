@@ -3,15 +3,9 @@ import { Link } from 'react-router-dom';
 import {
   Activity,
   Layers,
-  Clock,
-  AlertOctagon,
-  CheckCircle2,
-  HelpCircle,
   TrendingUp,
   DollarSign,
   ArrowRight,
-  ExternalLink,
-  ShieldCheck,
   AlertTriangle
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
@@ -74,7 +68,7 @@ export const DashboardPage: React.FC = () => {
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">TruthGuard Intelligence Dashboard</h1>
           <p className="mt-1 text-xs text-slate-400">
-            Real-time analytics on AI answer freshness, detected hallucinations, and verification performance.
+            Real-time analytics on AI answer freshness, detected stale claims, and verification telemetry.
           </p>
         </div>
 
@@ -92,7 +86,7 @@ export const DashboardPage: React.FC = () => {
         <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
           <span className="text-xs text-slate-400 block mb-1">Total Verification Runs</span>
           <span className="text-3xl font-extrabold font-mono text-white">{metrics?.total_runs || 0}</span>
-          <span className="text-[11px] text-slate-500 block mt-2">Persisted in PostgreSQL</span>
+          <span className="text-[11px] text-slate-500 block mt-2">Persisted in database</span>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-5">

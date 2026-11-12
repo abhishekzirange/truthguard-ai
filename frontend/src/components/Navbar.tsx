@@ -1,9 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShieldCheck, Activity, History, BarChart3, Settings, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Activity, History, BarChart3, Settings, Sparkles } from 'lucide-react';
+import { getIntegrationsStatus } from '../services/api';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const [tavilyOnline, setTavilyOnline] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getIntegrationsStatus()
+      .then((res) => {
+        if (active) {
+          setTavilyOnline(Boolean(res.tavily?.configured && res.tavily?.reachable));
+        }
+      })
+      .catch(() => {
+        if (active) setTavilyOnline(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [location.pathname]);
 
   const navLinks = [
     { to: '/workspace', label: 'Verify', icon: Sparkles },
@@ -31,7 +49,7 @@ export const Navbar: React.FC = () => {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.to;
@@ -54,10 +72,20 @@ export const Navbar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300">
-            <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
-            <span className="font-mono text-[11px] text-slate-400">Gateway: Active</span>
-          </div>
+          <Link
+            to="/settings"
+            title="View Tavily Search integration status"
+            className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300 hover:border-slate-700 transition-colors"
+          >
+            <span
+              className={`flex h-2 w-2 rounded-full ${
+                tavilyOnline === true ? 'bg-emerald-400' : tavilyOnline === false ? 'bg-amber-400' : 'bg-slate-500'
+              }`}
+            />
+            <span className="font-mono text-[11px] text-slate-400">
+              {tavilyOnline === true ? 'Tavily: Live' : tavilyOnline === false ? 'Tavily: Offline' : 'Tavily: Checking'}
+            </span>
+          </Link>
 
           <Link
             to="/workspace"
@@ -71,4 +99,3 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
-

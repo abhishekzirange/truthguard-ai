@@ -1,5 +1,4 @@
 import re
-import html
 from typing import Tuple, List
 
 # Patterns frequently used in prompt injection attempts embedded in untrusted web pages

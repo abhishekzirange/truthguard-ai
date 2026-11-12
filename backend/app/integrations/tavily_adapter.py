@@ -3,7 +3,7 @@ import time
 import asyncio
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
+from datetime import datetime
 import httpx
 from urllib.parse import urlparse
 from app.core.config import settings

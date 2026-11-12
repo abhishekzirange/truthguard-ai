@@ -1,27 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  ShieldCheck,
-  Clock,
-  Sparkles,
   ArrowLeft,
-  Filter,
-  CheckCircle2,
   AlertTriangle,
-  HelpCircle,
   ExternalLink,
   Layers,
   ArrowRight,
-  TrendingUp,
-  FileText,
   Radio,
   Wifi,
-  WifiOff,
-  Database,
-  Cpu
+  Database
 } from 'lucide-react';
 import { getVerificationRun } from '../services/api';
-import { VerificationRun, Claim, ClaimStatus } from '../types';
+import { VerificationRun, Claim } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 import { FreshnessGauge } from '../components/FreshnessGauge';
 

@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  BarChart3,
-  TrendingUp,
-  Clock,
-  Layers,
-  DollarSign,
-  PieChart as PieIcon,
-  ShieldCheck
-} from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import {
   ResponsiveContainer,
   BarChart,

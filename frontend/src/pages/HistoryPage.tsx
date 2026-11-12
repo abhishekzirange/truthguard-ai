@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { History, ArrowRight, Clock, Search, Layers, RefreshCw } from 'lucide-react';
+import { History, ArrowRight, Search, RefreshCw } from 'lucide-react';
 import { getHistory } from '../services/api';
 import { VerificationRunListItem } from '../types';
 
@@ -9,7 +9,7 @@ export const HistoryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadRuns = () => {
+  const loadRuns = useCallback(() => {
     setLoading(true);
     getHistory(0, 50)
       .then((data) => {
@@ -20,10 +20,24 @@ export const HistoryPage: React.FC = () => {
         console.error(err);
         setLoading(false);
       });
-  };
+  }, []);
 
   useEffect(() => {
-    loadRuns();
+    let active = true;
+    getHistory(0, 50)
+      .then((data) => {
+        if (active) {
+          setRuns(data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const filtered = runs.filter(

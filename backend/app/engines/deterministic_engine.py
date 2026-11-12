@@ -1,7 +1,7 @@
 import re
 import logging
 from enum import Enum
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any, List
 from packaging import version as pkg_version
 
 logger = logging.getLogger("truthguard.deterministic")

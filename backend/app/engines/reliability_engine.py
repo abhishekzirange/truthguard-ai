@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict
 from urllib.parse import urlparse
 
 # Trusted domain score map

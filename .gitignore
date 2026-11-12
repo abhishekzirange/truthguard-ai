@@ -59,3 +59,8 @@ Thumbs.db
 *.log
 logs/
 
+# Local presentation generation script & deliverables
+scripts/create_hackathon_presentation.py
+deliverables/
+
+

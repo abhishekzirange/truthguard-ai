@@ -10,7 +10,6 @@ from app.schemas.verification import (
 from app.schemas.claim import ClaimResponse
 from app.services.verification_service import VerificationService
 from app.services.history_service import HistoryService
-from app.models import VerificationRun
 
 router = APIRouter()
 
@@ -21,8 +20,8 @@ async def create_verification(
     db: Session = Depends(get_db)
 ):
     """
-    Submits an AI-generated answer for claim extraction, live web search,
-    Bifrost AI Gateway assessment, and freshness scoring.
+    Submits an AI-generated answer for claim extraction, Tavily live web search,
+    deterministic verification assessment, and freshness scoring.
     """
     service = VerificationService(db)
     try:

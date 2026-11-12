@@ -31,9 +31,6 @@ services:
     environment:
       DATABASE_URL: postgresql://truthguard:truthguard_secure_password@db:5432/truthguard
       TAVILY_API_KEY: ${TAVILY_API_KEY:-}
-      BIFROST_BASE_URL: ${BIFROST_BASE_URL:-https://api.bifrost.ai/v1}
-      BIFROST_API_KEY: ${BIFROST_API_KEY:-}
-      BIFROST_MODEL: ${BIFROST_MODEL:-gpt-4o-mini}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       BACKEND_HOST: 0.0.0.0
       BACKEND_PORT: 8000

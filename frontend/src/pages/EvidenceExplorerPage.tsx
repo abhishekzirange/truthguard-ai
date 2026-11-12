@@ -1,16 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ExternalLink,
-  ShieldCheck,
   Calendar,
   Layers,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  Sparkles,
-  Award,
   Globe
 } from 'lucide-react';
 import { getVerificationRun, getClaimEvidence } from '../services/api';
@@ -27,6 +21,18 @@ export const EvidenceExplorerPage: React.FC = () => {
   const [loadingEvidence, setLoadingEvidence] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const loadEvidenceForClaim = useCallback(async (claimId: string) => {
+    setLoadingEvidence(true);
+    try {
+      const items = await getClaimEvidence(claimId);
+      setEvidenceList(items);
+    } catch {
+      setEvidenceList([]);
+    } finally {
+      setLoadingEvidence(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (id) {
       getVerificationRun(id)
@@ -42,19 +48,7 @@ export const EvidenceExplorerPage: React.FC = () => {
           setLoading(false);
         });
     }
-  }, [id]);
-
-  const loadEvidenceForClaim = async (claimId: string) => {
-    setLoadingEvidence(true);
-    try {
-      const items = await getClaimEvidence(claimId);
-      setEvidenceList(items);
-    } catch {
-      setEvidenceList([]);
-    } finally {
-      setLoadingEvidence(false);
-    }
-  };
+  }, [id, loadEvidenceForClaim]);
 
   const handleSelectClaim = (idx: number) => {
     if (!run) return;

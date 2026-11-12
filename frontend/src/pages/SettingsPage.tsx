@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
   Settings,
-  ShieldCheck,
-  CheckCircle2,
-  XCircle,
   RefreshCw,
   Search,
   Cpu,
   Database,
   Sliders,
-  ExternalLink,
   Lock
 } from 'lucide-react';
 import { getIntegrationsStatus } from '../services/api';
@@ -17,7 +13,6 @@ import { IntegrationsReport } from '../types';
 
 export const SettingsPage: React.FC = () => {
   const [report, setReport] = useState<IntegrationsReport | null>(null);
-  const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState(false);
 
   const checkStatus = () => {
@@ -25,18 +20,24 @@ export const SettingsPage: React.FC = () => {
     getIntegrationsStatus()
       .then((data) => {
         setReport(data);
-        setLoading(false);
         setTesting(false);
       })
       .catch((err) => {
         console.error(err);
-        setLoading(false);
         setTesting(false);
       });
   };
 
   useEffect(() => {
-    checkStatus();
+    let active = true;
+    getIntegrationsStatus()
+      .then((data) => {
+        if (active) setReport(data);
+      })
+      .catch((err) => console.error(err));
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (
@@ -48,9 +49,9 @@ export const SettingsPage: React.FC = () => {
             <Settings className="h-3.5 w-3.5 text-teal-400" />
             <span>Infrastructure & Diagnostics</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">System Settings & Gateway Status</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-white">System Settings & Integration Status</h1>
           <p className="mt-1 text-xs text-slate-400">
-            Audit backend connections, AI gateway configurations, and mathematical freshness decay policies.
+            Audit backend connections, Tavily Search connectivity, and mathematical freshness decay policies.
           </p>
         </div>
 

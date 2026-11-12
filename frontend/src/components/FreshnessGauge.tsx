@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarOff, Sparkles, ShieldAlert } from 'lucide-react';
+import { CalendarOff } from 'lucide-react';
 
 interface FreshnessGaugeProps {
   score: number | null;

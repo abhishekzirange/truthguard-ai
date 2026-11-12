@@ -2,14 +2,13 @@ import time
 import uuid
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 
 from app.models import (
     VerificationRun, Claim, Evidence, ClaimAssessment,
     ModelUsage, VerificationEvent
 )
-from app.schemas.verification import VerificationRequest, VerificationRunResponse
+from app.schemas.verification import VerificationRequest
 from app.engines.extraction_engine import ClaimExtractionEngine
 from app.engines.query_planner import QueryPlanner
 from app.integrations.tavily_adapter import TavilyAdapter

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from app.models import VerificationRun, Claim, ClaimAssessment, ModelUsage

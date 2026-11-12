@@ -1,22 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ShieldCheck,
-  Search,
   Sparkles,
-  Zap,
   ArrowRight,
   Clock,
-  Layers,
-  Database,
-  CheckCircle2,
   AlertTriangle,
   GitCompare,
-  FileCheck2,
-  ExternalLink,
 } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
-import { FreshnessGauge } from '../components/FreshnessGauge';
 
 export const LandingPage: React.FC = () => {
   return (
@@ -26,8 +17,8 @@ export const LandingPage: React.FC = () => {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(99,102,241,0.18),rgba(255,255,255,0))]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1.5 text-xs font-medium text-indigo-300 mb-8 backdrop-blur-sm">
-            <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
-            <span>Built for the Stale-Answer Hackathon Challenge</span>
+            <span className="flex h-2 w-2 rounded-full bg-teal-400" />
+            <span>Stale-Answer Detector for AI Applications • Tavily Track</span>
           </div>
 
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl max-w-4xl mx-auto leading-[1.15]">
@@ -38,7 +29,7 @@ export const LandingPage: React.FC = () => {
           </h1>
 
           <p className="mt-6 text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Detect outdated AI-generated information with live evidence, temporal intelligence and transparent claim-level verification.
+            Detect outdated AI-generated information with live Tavily search retrieval, temporal freshness decay, and transparent claim-level verification.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -77,12 +68,12 @@ export const LandingPage: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="rounded-lg bg-rose-950/20 border border-rose-900/40 p-3">
-                  <p className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider mb-1">Detected Contradiction</p>
-                  <p className="text-xs text-rose-200">Python 3.12 and 3.13 have officially superseded Python 3.11 on python.org.</p>
+                  <p className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider mb-1">Detected Supersession</p>
+                  <p className="text-xs text-rose-200">Official python.org documentation confirms Python 3.11 is in security-only maintenance.</p>
                 </div>
                 <div className="rounded-lg bg-emerald-950/20 border border-emerald-900/40 p-3">
                   <p className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider mb-1">Evidence-Backed Correction</p>
-                  <p className="text-xs text-emerald-200">Python 3.13 is the current stable release (Python Software Foundation).</p>
+                  <p className="text-xs text-emerald-200">Python 3.15.2 is the current stable release (verified via live Tavily search).</p>
                 </div>
               </div>
             </div>

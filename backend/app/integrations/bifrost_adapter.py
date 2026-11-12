@@ -3,7 +3,7 @@ import json
 import time
 import asyncio
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import httpx
 from app.core.config import settings
 
